@@ -21,4 +21,16 @@ describe("toNezhaServer", () => {
 		});
 		expect(note?.billingDataMod?.amount).toBe("");
 	});
+
+	it("formats numeric CFSM traffic limits as monthly GB plan badges", () => {
+		const server = toNezhaServer({
+			id: "edge-traffic-limit",
+			name: "edge-traffic-limit",
+			traffic_limit: "10000.0",
+		});
+
+		expect(parsePublicNote(server.public_note)?.planDataMod?.trafficVol).toBe(
+			"10000GB/月",
+		);
+	});
 });

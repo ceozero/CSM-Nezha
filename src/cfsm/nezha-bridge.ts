@@ -20,6 +20,19 @@ function megabytesToBytes(value: unknown) {
 	return numberValue(value) * MEBIBYTE;
 }
 
+/** CFSM 套餐流量以 GB 数值保存；原主题徽标需要可读的套餐文案。 */
+function formatTrafficLimit(value: unknown) {
+	const trafficLimit = String(value ?? "").trim();
+	if (!trafficLimit) return "";
+	if (!/^\d+(?:\.\d+)?$/.test(trafficLimit)) return trafficLimit;
+
+	const numericValue = Number(trafficLimit);
+	const displayValue = Number.isInteger(numericValue)
+		? String(numericValue)
+		: String(numericValue);
+	return `${displayValue}GB/月`;
+}
+
 function parseGpuNames(value: CfsmServer["gpu_info"]) {
 	if (Array.isArray(value)) return value.map((gpu) => gpu.name).filter(Boolean);
 	if (typeof value !== "string") return [];
@@ -53,7 +66,7 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 	const bootTimeSeconds = bootTimeMs > 10_000_000_000 ? bootTimeMs / 1000 : bootTimeMs;
 	const uptime = bootTimeSeconds > 0 ? Math.max(0, Math.floor(Date.now() / 1000 - bootTimeSeconds)) : 0;
 	const price = server.price === undefined || server.price === null ? "" : String(server.price);
-	const trafficLimit = server.traffic_limit === undefined || server.traffic_limit === null ? "" : String(server.traffic_limit);
+	const trafficLimit = formatTrafficLimit(server.traffic_limit);
 	// 即使 CFSM 没有套餐价格，也要保留其真实的 IP 能力和标签，
 	// 否则原主题的 IPv4/IPv6 与线路徽标会被错误地省略。
 	const hasPlanInfo =
