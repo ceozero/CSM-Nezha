@@ -29,6 +29,27 @@ const HISTORY_HOURS: Record<MetricPeriod, number> = {
 	"7d": 168,
 };
 
+const inFlightHistoryRequests = new Map<string, Promise<HistoryRow[]>>();
+
+/**
+ * 详情页的多个图表来自同一份 CFSM 历史响应。合并同一服务器、同一时间段的
+ * 并发请求，避免首次切换 3/7 天时同时发出十余个相同的 D1 查询。
+ */
+function getSharedHistory(serverId: string, period: MetricPeriod) {
+	const hours = HISTORY_HOURS[period];
+	const key = `${serverId}:${hours}`;
+	const existing = inFlightHistoryRequests.get(key);
+	if (existing) return existing;
+
+	const request = getHistory(serverId, hours);
+	inFlightHistoryRequests.set(key, request);
+	request.then(
+		() => inFlightHistoryRequests.delete(key),
+		() => inFlightHistoryRequests.delete(key),
+	);
+	return request;
+}
+
 function trimRowsForPeriod(rows: HistoryRow[], period: MetricPeriod) {
 	if (period !== "3d") return rows;
 	const startAt = Date.now() - 72 * 60 * 60 * 1000;
@@ -115,7 +136,7 @@ export const fetchMonitor = async (
 	}
 
 	const rows = trimRowsForPeriod(
-		await getHistory(serverId, HISTORY_HOURS[period]),
+		await getSharedHistory(serverId, period),
 		period,
 	);
 	const ping = rows.map((row) => ({
@@ -165,7 +186,7 @@ export const fetchServerMetrics = async (
 	period: MetricPeriod = "1d",
 ): Promise<ServerMetricsResponse> => {
 	const rows = trimRowsForPeriod(
-		await getHistory(serverId, HISTORY_HOURS[period]),
+		await getSharedHistory(serverId, period),
 		period,
 	);
 	return {

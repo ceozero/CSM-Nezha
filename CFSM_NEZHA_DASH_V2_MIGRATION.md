@@ -178,6 +178,8 @@ GET  /api/ws?subscribe=<all|server-id>
 
 主题 URL 模式不需要配置独立 `apiBase`，通常也不需要额外配置 CORS。
 
+管理员登录后，CFSM 会把 JWT 保存为 `localStorage.token`。主题的同源请求必须将它转发为 `Authorization: Bearer <token>`，否则后端会拒绝超过 24 小时的历史数据；不要用 `document.cookie` 判断登录状态，JWT 并不在 Cookie 中。
+
 `/api/config` 返回的 `theme_options` 是第三方主题的运行时配置。本主题第一版只读取它，不保存主题专属选项；如后续需要保存专属选项，只能使用公开的 `POST /api/theme_options`，不得调用 `save_settings` 等管理接口。站点级外观设置仍应跳转 CFSM 内置后台 `/admin#admin`。
 
 ### 类型与字段适配

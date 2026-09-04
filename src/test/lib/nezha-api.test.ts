@@ -61,6 +61,23 @@ describe("Nezha 视图兼容 API", () => {
 		expect(apiMocks.getHistory).toHaveBeenCalledWith("node-1", 168);
 	});
 
+	it("合并同一服务器和时间段的并发历史请求", async () => {
+		let resolveHistory: (rows: Array<{ timestamp: number; cpu: number }>) => void;
+		apiMocks.getHistory.mockImplementation(
+			() =>
+				new Promise<Array<{ timestamp: number; cpu: number }>>((resolve) => {
+					resolveHistory = resolve;
+				}),
+		);
+
+		const cpuRequest = fetchServerMetrics("node-1", "cpu", "7d");
+		const memoryRequest = fetchServerMetrics("node-1", "memory", "7d");
+		expect(apiMocks.getHistory).toHaveBeenCalledTimes(1);
+		resolveHistory!([{ timestamp: 1000, cpu: 25 }]);
+
+		await expect(Promise.all([cpuRequest, memoryRequest])).resolves.toHaveLength(2);
+	});
+
 	it("将 CFSM 三网窗口桥接为原主题的网络图表数据", async () => {
 		apiMocks.getServers.mockResolvedValue({
 			servers: [{

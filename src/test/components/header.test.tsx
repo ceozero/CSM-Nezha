@@ -126,10 +126,6 @@ describe("Header", () => {
 			]),
 			CustomLogo: "/logo.png",
 		});
-		Object.defineProperty(document, "cookie", {
-			configurable: true,
-			value: "session=1",
-		});
 		sessionStorage.setItem("selectedGroup", "Edge");
 		headerMocks.fetchSetting.mockResolvedValue(settingResponse("Status Hub"));
 		headerMocks.fetchLoginUser.mockResolvedValue(loginResponse());

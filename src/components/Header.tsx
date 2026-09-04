@@ -305,7 +305,7 @@ function DashboardLink() {
 	const isLogin = isError
 		? false
 		: userData
-			? !!userData?.data?.id && !!document.cookie
+			? !!userData?.data?.id
 			: false;
 
 	if (isLoadingError) {
