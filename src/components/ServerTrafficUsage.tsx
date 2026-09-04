@@ -45,7 +45,7 @@ export default function ServerTrafficUsage({
 	return (
 		<section
 			aria-label={t("serverCard.monthlyTraffic")}
-			className="flex h-6 min-w-0 flex-[1.4] items-center gap-1.5 rounded-[8px] border border-border/70 bg-muted/35 px-2 text-[10px]"
+			className="flex h-6 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[8px] border border-border/70 bg-muted/35 px-2 text-[10px]"
 		>
 			<span className="shrink-0 text-muted-foreground">
 				{t("serverCard.monthlyTraffic")}
