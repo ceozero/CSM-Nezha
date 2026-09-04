@@ -52,6 +52,21 @@ describe("toNezhaServer", () => {
 		).toBe("500GB/月");
 	});
 
+	it("preserves each server's CFSM currency symbol for plan prices", () => {
+		const server = toNezhaServer({
+			id: "edge-currency",
+			name: "edge-currency",
+			price: "100.00",
+			billing_cycle: "year",
+			currency: "¥",
+		});
+
+		expect(parsePublicNote(server.public_note)?.billingDataMod).toMatchObject({
+			amount: "100.00",
+			currency: "¥",
+		});
+	});
+
 	it("maps the latest CFSM network samples and hides disabled routes", () => {
 		const server = toNezhaServer({
 			id: "edge-latency",

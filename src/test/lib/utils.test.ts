@@ -152,6 +152,7 @@ describe("public note helpers", () => {
 				autoRenewal: "",
 				cycle: "year",
 				amount: "",
+				currency: "",
 			},
 			planDataMod: {
 				bandwidth: "1Gbps",
@@ -190,6 +191,7 @@ describe("public note helpers", () => {
 				autoRenewal: "",
 				cycle: "",
 				amount: "20",
+				currency: "",
 			},
 		});
 		expect(

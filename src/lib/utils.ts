@@ -251,6 +251,7 @@ interface BillingData {
 	autoRenewal: string;
 	cycle: string;
 	amount: string;
+	currency?: string;
 }
 
 interface PlanData {
@@ -285,6 +286,7 @@ export function parsePublicNote(publicNote: string): PublicNoteData | null {
 					autoRenewal: data.billingDataMod.autoRenewal || "",
 					cycle: data.billingDataMod.cycle || "",
 					amount: data.billingDataMod.amount || "",
+					currency: data.billingDataMod.currency || "",
 				},
 			};
 		}
@@ -309,6 +311,7 @@ export function parsePublicNote(publicNote: string): PublicNoteData | null {
 				autoRenewal: data.billingDataMod.autoRenewal || "",
 				cycle: data.billingDataMod.cycle || "",
 				amount: data.billingDataMod.amount || "",
+				currency: data.billingDataMod.currency || "",
 			},
 			planDataMod: {
 				bandwidth: data.planDataMod.bandwidth || "",

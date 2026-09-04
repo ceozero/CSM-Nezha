@@ -74,13 +74,14 @@ describe("PlanInfo and BillingInfo", () => {
 						autoRenewal: "0",
 						cycle: "monthly",
 						amount: "10",
+						currency: "¥",
 					},
 				}}
 			/>,
 		);
 
 		expect(
-			screen.getByText("billingInfo.price: $10/monthly"),
+			screen.getByText("billingInfo.price: ¥10/monthly"),
 		).toBeInTheDocument();
 		expect(screen.getByText(/billingInfo.remaining: 16/)).toBeInTheDocument();
 		expect(screen.getByRole("progressbar")).toBeInTheDocument();

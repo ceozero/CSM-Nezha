@@ -21,6 +21,8 @@ export interface CfsmServer {
 	name: string;
 	server_group?: string;
 	tags?: string;
+	/** 后台为每台服务器设置的价格货币符号，例如 ¥、$、€。 */
+	currency?: string;
 	cpu?: number;
 	load_avg?: string;
 	net_in_speed?: number;
