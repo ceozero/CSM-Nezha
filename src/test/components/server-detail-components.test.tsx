@@ -106,6 +106,10 @@ describe("ServerDetailOverview", () => {
 				},
 				state: {
 					temperatures: [{ Name: "CPU Core", Temperature: 55.5 }],
+					net_in_monthly_transfer: 3 * 1024 ** 3,
+					net_out_monthly_transfer: 2 * 1024 ** 3,
+					traffic_limit: 10,
+					traffic_calc_type: "total",
 				},
 			}),
 		});
@@ -127,6 +131,9 @@ describe("ServerDetailOverview", () => {
 		expect(screen.getByText("NVIDIA T4")).toBeInTheDocument();
 		expect(screen.getByText("2.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("1.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("serverCard.monthlyTraffic")).toBeInTheDocument();
+		expect(screen.getByText("5.00 GiB / 10.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("50.0%")).toBeInTheDocument();
 
 		await user.click(
 			screen.getByRole("button", { name: /serverDetail.temperature/ }),

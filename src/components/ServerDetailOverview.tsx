@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { BackIcon } from "@/components/Icon";
 import { ServerDetailLoading } from "@/components/loading/ServerDetailLoading";
 import ServerFlag from "@/components/ServerFlag";
+import { monthlyTrafficUsage } from "@/components/ServerTrafficUsage";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
@@ -100,6 +101,16 @@ export default function ServerDetailOverview({
 		(window.CustomBackgroundImage as string) !== ""
 			? window.CustomBackgroundImage
 			: undefined;
+	// 详情页与首页共用 CFSM 的 total / ul / dl / max 月流量计算规则。
+	const monthlyDown = server.state.net_in_monthly_transfer;
+	const monthlyUp = server.state.net_out_monthly_transfer;
+	const monthlyLimit = server.state.traffic_limit * 1024 ** 3;
+	const monthlyUsed = monthlyTrafficUsage(
+		monthlyDown,
+		monthlyUp,
+		server.state.traffic_calc_type,
+	);
+	const monthlyPercent = monthlyLimit > 0 ? (monthlyUsed / monthlyLimit) * 100 : 0;
 
 	countries.registerLocale(enLocale);
 
@@ -336,6 +347,35 @@ export default function ServerDetailOverview({
 						</CardContent>
 					</Card>
 				) : null}
+				<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
+					<CardContent className="px-1.5 py-1">
+						<section className="flex flex-col items-start gap-0.5">
+							<p className="text-xs text-muted-foreground">
+								{t("serverCard.monthlyTraffic")}
+							</p>
+							{monthlyLimit > 0 ? (
+								<div className="flex items-center gap-1 text-xs tabular-nums">
+									<NumericText
+										value={`${formatBytes(monthlyUsed)} / ${formatBytes(monthlyLimit)}`}
+										className="text-xs"
+									/>
+									<span className="text-muted-foreground">
+										{monthlyPercent.toFixed(1)}%
+									</span>
+								</div>
+							) : (
+								<div className="flex items-center gap-2 text-xs tabular-nums">
+									<span className="text-sky-600 dark:text-sky-400">
+										↑ {formatBytes(monthlyUp)}
+									</span>
+									<span className="text-violet-600 dark:text-violet-400">
+										↓ {formatBytes(monthlyDown)}
+									</span>
+								</div>
+							)}
+						</section>
+					</CardContent>
+				</Card>
 			</section>
 			<section className="flex flex-wrap gap-2 mt-1">
 				{server?.state.temperatures &&
