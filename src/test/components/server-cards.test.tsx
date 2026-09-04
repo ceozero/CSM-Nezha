@@ -41,6 +41,45 @@ describe("ServerCard", () => {
 		});
 	});
 
+	it("uses the full original layout when CFSM does not inject theme switches", () => {
+		Reflect.deleteProperty(window, "FixedTopServerName");
+		Reflect.deleteProperty(window, "ShowNetTransfer");
+		const server = createServer({
+			name: "edge-default-layout",
+			public_note: publicNote,
+			host: { platform: "Debian" },
+		});
+
+		renderWithProviders(
+			<ServerCard
+				now={Date.parse("2025-01-01T00:00:20.000Z")}
+				serverInfo={server}
+			/>,
+		);
+
+		expect(screen.getByText("serverCard.system")).toBeInTheDocument();
+		expect(screen.getByText("serverCard.upload:2.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("serverCard.download:1.00 GiB")).toBeInTheDocument();
+	});
+
+	it("allows a theme author to explicitly use the compact layout", () => {
+		Object.assign(window, {
+			FixedTopServerName: false,
+			ShowNetTransfer: false,
+		});
+		const server = createServer({ name: "edge-compact-layout" });
+
+		renderWithProviders(
+			<ServerCard
+				now={Date.parse("2025-01-01T00:00:20.000Z")}
+				serverInfo={server}
+			/>,
+		);
+
+		expect(screen.queryByText("serverCard.system")).not.toBeInTheDocument();
+		expect(screen.queryByText("serverCard.upload:2.00 GiB")).not.toBeInTheDocument();
+	});
+
 	it("renders online server metrics, billing, plan data, and navigates on click", async () => {
 		const server = createServer({
 			id: 7,

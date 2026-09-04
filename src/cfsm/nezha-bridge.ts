@@ -54,8 +54,17 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 	const uptime = bootTimeSeconds > 0 ? Math.max(0, Math.floor(Date.now() / 1000 - bootTimeSeconds)) : 0;
 	const price = server.price === undefined || server.price === null ? "" : String(server.price);
 	const trafficLimit = server.traffic_limit === undefined || server.traffic_limit === null ? "" : String(server.traffic_limit);
+	// 即使 CFSM 没有套餐价格，也要保留其真实的 IP 能力和标签，
+	// 否则原主题的 IPv4/IPv6 与线路徽标会被错误地省略。
+	const hasPlanInfo =
+		price ||
+		trafficLimit ||
+		server.expire_date ||
+		server.tags ||
+		String(server.ip_v4 || "") === "1" ||
+		String(server.ip_v6 || "") === "1";
 	const publicNote =
-		price || trafficLimit || server.expire_date
+		hasPlanInfo
 			? JSON.stringify({
 					billingDataMod: {
 						startDate: "",

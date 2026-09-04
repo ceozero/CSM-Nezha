@@ -52,11 +52,12 @@ function ServerCard({
 			? window.CustomBackgroundImage
 			: undefined;
 
+	// CFSM 不会注入原主题的全局开关；未配置时应保持原主题的完整卡片。
 	// @ts-expect-error ShowNetTransfer is a global variable
-	const showNetTransfer = window.ShowNetTransfer as boolean;
+	const showNetTransfer = window.ShowNetTransfer !== false;
 
 	// @ts-expect-error FixedTopServerName is a global variable
-	const fixedTopServerName = window.FixedTopServerName as boolean;
+	const fixedTopServerName = window.FixedTopServerName !== false;
 
 	const parsedData = parsePublicNote(public_note);
 
