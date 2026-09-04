@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -17,20 +16,11 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { formatBytes } from "@/lib/format";
-import {
-	fetchLoginUser,
-	fetchServerMetrics,
-	fetchSetting,
-} from "@/lib/nezha-api";
+import { fetchServerMetrics } from "@/lib/nezha-api";
 import {
 	cn,
 	formatNezhaInfo,
@@ -96,22 +86,22 @@ const sleep = (ms: number) =>
 function PeriodSelector({
 	selectedPeriod,
 	onPeriodChange,
-	isLogin,
-	isTsdbEnabled,
 }: {
 	selectedPeriod: ChartPeriod;
 	onPeriodChange: (period: ChartPeriod) => void;
-	isLogin: boolean;
-	isTsdbEnabled: boolean;
 }) {
 	const { t } = useTranslation();
 
 	const periods = useMemo<{ value: ChartPeriod; label: string }[]>(
 		() => [
 			{ value: "realtime", label: t("serverDetailChart.realtime") },
+			{ value: "10m", label: t("serverDetailChart.period10m", "10 分") },
+			{ value: "30m", label: t("serverDetailChart.period30m", "30 分") },
+			{ value: "1h", label: t("serverDetailChart.period1h", "1 时") },
+			{ value: "6h", label: t("serverDetailChart.period6h", "6 时") },
 			{ value: "1d", label: t("serverDetailChart.period1d") },
+			{ value: "3d", label: t("serverDetailChart.period3d", "3 天") },
 			{ value: "7d", label: t("serverDetailChart.period7d") },
-			{ value: "30d", label: t("serverDetailChart.period30d") },
 		],
 		[t],
 	);
@@ -142,33 +132,20 @@ function PeriodSelector({
 					/>
 				)}
 				{periods.map((period, index) => {
-					const isHistoryPeriod = period.value !== "realtime";
-					const isLockedByTsdb = !isTsdbEnabled && isHistoryPeriod;
-					// Only realtime and 1d are available for non-logged-in users
-					const isLockedByLogin =
-						!isLockedByTsdb &&
-						!isLogin &&
-						period.value !== "realtime" &&
-						period.value !== "1d";
-					const isLocked = isLockedByTsdb || isLockedByLogin;
-
-					const periodItem = (
-						<div
+					return (
+						<div key={period.value}
 							ref={setItemRef(index)}
 							onClick={() => {
-								if (!isLocked) {
-									if (selectedPeriod !== period.value) {
-										enableIndicatorAnimation();
-									}
-									onPeriodChange(period.value);
+								if (selectedPeriod !== period.value) {
+									enableIndicatorAnimation();
 								}
+								onPeriodChange(period.value);
 							}}
 							className={cn(
 								"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
 								selectedPeriod === period.value
 									? "text-foreground"
 									: "text-muted-foreground hover:text-foreground",
-								isLocked && "cursor-not-allowed opacity-40 grayscale",
 							)}
 						>
 							<div className="relative z-20 flex items-center gap-1.5">
@@ -179,27 +156,6 @@ function PeriodSelector({
 							</div>
 						</div>
 					);
-
-					if (isLockedByTsdb || isLockedByLogin) {
-						return (
-							<Tooltip key={period.value}>
-								<TooltipTrigger asChild>{periodItem}</TooltipTrigger>
-								<TooltipContent>
-									{isLockedByTsdb
-										? t(
-												"serverDetailChart.tsdbRequired",
-												"Enable TSDB to use historical data",
-											)
-										: t(
-												"serverDetailChart.loginRequired",
-												"Please login to view",
-											)}
-								</TooltipContent>
-							</Tooltip>
-						);
-					}
-
-					return <div key={period.value}>{periodItem}</div>;
 				})}
 			</div>
 		</TooltipProvider>
@@ -213,48 +169,6 @@ export default function ServerDetailChart({
 }) {
 	const { lastData, connected, messageHistory } = useWebSocketContext();
 	const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>("realtime");
-
-	// Check if user is logged in
-	const { data: userData, isError: isLoginError } = useQuery({
-		queryKey: ["login-user"],
-		queryFn: () => fetchLoginUser(),
-		refetchOnMount: false,
-		refetchOnWindowFocus: true,
-		refetchIntervalInBackground: true,
-		refetchInterval: 1000 * 30,
-		retry: 0,
-	});
-	const isLogin = isLoginError
-		? false
-		: userData
-			? !!userData?.data?.id && !!document.cookie
-			: false;
-
-	const { data: settingData } = useQuery({
-		queryKey: ["setting"],
-		queryFn: () => fetchSetting(),
-		refetchOnMount: true,
-		refetchOnWindowFocus: true,
-	});
-	const isTsdbEnabled = settingData?.data?.tsdb_enabled ?? true;
-
-	useEffect(() => {
-		if (!isTsdbEnabled && selectedPeriod !== "realtime") {
-			setSelectedPeriod("realtime");
-		}
-	}, [isTsdbEnabled, selectedPeriod]);
-
-	// Reset period if user is not logged in and selected period is restricted
-	useEffect(() => {
-		if (
-			isTsdbEnabled &&
-			!isLogin &&
-			selectedPeriod !== "realtime" &&
-			selectedPeriod !== "1d"
-		) {
-			setSelectedPeriod("1d");
-		}
-	}, [isLogin, isTsdbEnabled, selectedPeriod]);
 
 	if (!connected && !lastData) {
 		return <ServerDetailChartLoading />;
@@ -280,8 +194,6 @@ export default function ServerDetailChart({
 			<PeriodSelector
 				selectedPeriod={selectedPeriod}
 				onPeriodChange={setSelectedPeriod}
-				isLogin={isLogin}
-				isTsdbEnabled={isTsdbEnabled}
 			/>
 			<section className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-3 server-charts">
 				<CpuChart

@@ -8,13 +8,9 @@ import type { ChartConfig } from "@/components/ui/chart";
 import { createTestQueryClient } from "@/test/utils";
 import type { NezhaMonitor, ServerMonitorChart } from "@/types/nezha-api";
 
-const apiMocks = vi.hoisted(() => ({
-	fetchLoginUser: vi.fn(),
-	fetchMonitor: vi.fn(),
-}));
+const apiMocks = vi.hoisted(() => ({ fetchMonitor: vi.fn() }));
 
 vi.mock("@/lib/nezha-api", () => ({
-	fetchLoginUser: apiMocks.fetchLoginUser,
 	fetchMonitor: apiMocks.fetchMonitor,
 }));
 
@@ -121,19 +117,6 @@ const chartConfig = {
 	Beta: { label: "Beta" },
 } satisfies ChartConfig;
 
-function loginResponse() {
-	return {
-		success: true,
-		data: {
-			id: 1,
-			username: "admin",
-			password: "",
-			created_at: "2025-01-01T00:00:00.000Z",
-			updated_at: "2025-01-01T00:00:00.000Z",
-		},
-	};
-}
-
 function renderWithQuery(ui: ReactElement) {
 	return render(
 		<QueryClientProvider client={createTestQueryClient()}>
@@ -144,13 +127,7 @@ function renderWithQuery(ui: ReactElement) {
 
 describe("NetworkChart", () => {
 	beforeEach(() => {
-		apiMocks.fetchLoginUser.mockReset();
 		apiMocks.fetchMonitor.mockReset();
-		apiMocks.fetchLoginUser.mockRejectedValue(new Error("anonymous"));
-		Object.defineProperty(document, "cookie", {
-			configurable: true,
-			value: "",
-		});
 	});
 
 	it("renders the loading state while monitor data is unavailable", () => {
@@ -175,13 +152,8 @@ describe("NetworkChart", () => {
 		expect(await screen.findByText("monitor.noData")).toBeInTheDocument();
 	});
 
-	it("fetches monitor data, transforms chart series, and allows logged-in period changes", async () => {
+	it("fetches realtime monitor data, transforms chart series, and allows all period changes", async () => {
 		const user = userEvent.setup();
-		Object.defineProperty(document, "cookie", {
-			configurable: true,
-			value: "session=1",
-		});
-		apiMocks.fetchLoginUser.mockResolvedValue(loginResponse());
 		apiMocks.fetchMonitor.mockResolvedValue({
 			success: true,
 			data: monitorData,
@@ -190,7 +162,7 @@ describe("NetworkChart", () => {
 		renderWithQuery(<NetworkChart server_id="7" show={true} />);
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
-		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d");
+		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "realtime");
 		expect(screen.getByText("2 monitor.monitorCount")).toBeInTheDocument();
 		expect(screen.getByText("Alpha")).toBeInTheDocument();
 		expect(screen.getByText("Beta")).toBeInTheDocument();
@@ -208,7 +180,7 @@ describe("NetworkChart", () => {
 });
 
 describe("NetworkChartClient", () => {
-	it("locks longer periods for anonymous users and manages chart selection state", async () => {
+	it("does not lock historical periods and manages chart selection state", async () => {
 		const user = userEvent.setup();
 		const onPeriodChange = vi.fn();
 
@@ -222,7 +194,6 @@ describe("NetworkChartClient", () => {
 				isPeriodLoading={false}
 				period="1d"
 				onPeriodChange={onPeriodChange}
-				isLogin={false}
 			/>,
 		);
 
@@ -230,7 +201,7 @@ describe("NetworkChartClient", () => {
 		expect(screen.getByText("2 monitor.monitorCount")).toBeInTheDocument();
 
 		await user.click(screen.getByText("monitor.period7d"));
-		expect(onPeriodChange).not.toHaveBeenCalled();
+		expect(onPeriodChange).toHaveBeenCalledWith("7d");
 
 		await user.click(screen.getByText("Alpha"));
 		expect(
@@ -267,7 +238,6 @@ describe("NetworkChartClient", () => {
 				isPeriodLoading={true}
 				period="1d"
 				onPeriodChange={onPeriodChange}
-				isLogin={true}
 			/>,
 		);
 
@@ -276,8 +246,8 @@ describe("NetworkChartClient", () => {
 			screen.getByRole("switch", { name: "monitor.peakCut" }),
 		).toHaveAttribute("data-state", "checked");
 
-		await user.click(screen.getByText("monitor.period30d"));
-		expect(onPeriodChange).toHaveBeenCalledWith("30d");
+		await user.click(screen.getByText("monitor.period3d"));
+		expect(onPeriodChange).toHaveBeenCalledWith("3d");
 
 		await user.click(screen.getByRole("switch", { name: "monitor.peakCut" }));
 		expect(

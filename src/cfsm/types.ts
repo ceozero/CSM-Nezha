@@ -10,10 +10,10 @@ export interface DiskIoMetrics {
 /** CFSM 三网/百度线路的真实延迟或丢包采样点。 */
 export interface CfsmLatencyPoint {
 	ts: number;
-	ct?: number;
-	cu?: number;
-	cm?: number;
-	bd?: number;
+	ct?: number | false;
+	cu?: number | false;
+	cm?: number | false;
+	bd?: number | false;
 }
 
 export interface CfsmServer {
@@ -59,6 +59,15 @@ export interface CfsmServer {
 
 export interface HistoryRow extends Partial<CfsmServer> {
 	timestamp: number;
+	/** 历史接口返回的四线路延迟与丢包数据。false 表示该线路未启用。 */
+	ping_ct?: number | false;
+	ping_cu?: number | false;
+	ping_cm?: number | false;
+	ping_bd?: number | false;
+	loss_ct?: number | false;
+	loss_cu?: number | false;
+	loss_cm?: number | false;
+	loss_bd?: number | false;
 	disk_read_bps?: number;
 	disk_write_bps?: number;
 	disk_read_iops?: number;

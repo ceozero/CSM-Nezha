@@ -69,12 +69,53 @@ describe("Nezha 视图兼容 API", () => {
 				loss: [{ ts: 1000, ct: 0, cu: 1, cm: 0, bd: 2 }],
 			}],
 		});
-		const monitor = await fetchMonitor("node-1", "7d");
+		const monitor = await fetchMonitor("node-1", "realtime");
 		expect(monitor.success).toBe(true);
 		expect(monitor.data).toEqual(expect.arrayContaining([
 			expect.objectContaining({ monitor_name: "电信", server_id: "node-1", avg_delay: [21], packet_loss: [0] }),
 			expect.objectContaining({ monitor_name: "联通", avg_delay: [25], packet_loss: [1] }),
 		]));
+	});
+
+	it("历史网络数据按所选时间段请求，3 天仅保留最近 72 小时", async () => {
+		const now = Date.parse("2025-01-10T00:00:00.000Z");
+		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(now);
+		apiMocks.getHistory.mockResolvedValue([
+			{ timestamp: now - 73 * 60 * 60 * 1000, ping_ct: 99, loss_ct: 0 },
+			{ timestamp: now - 3 * 60 * 60 * 1000, ping_ct: 22, loss_ct: 1 },
+		]);
+
+		try {
+			const monitor = await fetchMonitor("node-1", "3d");
+			expect(apiMocks.getHistory).toHaveBeenCalledWith("node-1", 96);
+			expect(monitor.data).toEqual(expect.arrayContaining([
+				expect.objectContaining({
+					monitor_name: "电信",
+					avg_delay: [22],
+					packet_loss: [1],
+				}),
+			]));
+		} finally {
+			nowSpy.mockRestore();
+		}
+	});
+
+	it("3 天资源指标请求 96 小时窗口并裁切为最近 72 小时", async () => {
+		const now = Date.parse("2025-01-10T00:00:00.000Z");
+		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(now);
+		apiMocks.getHistory.mockResolvedValue([
+			{ timestamp: now - 73 * 60 * 60 * 1000, cpu: 99 },
+			{ timestamp: now - 3 * 60 * 60 * 1000, cpu: 22 },
+		]);
+
+		try {
+			await expect(fetchServerMetrics("node-1", "cpu", "3d")).resolves.toMatchObject({
+				data: { data_points: [{ ts: now - 3 * 60 * 60 * 1000, value: 22 }] },
+			});
+			expect(apiMocks.getHistory).toHaveBeenCalledWith("node-1", 96);
+		} finally {
+			nowSpy.mockRestore();
+		}
 	});
 
 	it("将 CFSM 未提供的服务监控降级为空数据而非伪造结果", async () => {

@@ -182,7 +182,11 @@ export type MetricType =
 	| "uptime"
 	| "gpu";
 
-export type MetricPeriod = "1d" | "7d" | "30d";
+/**
+ * CFSM 的历史接口支持的展示区间。3 天由 96 小时数据在前端裁切而成，
+ * 因为后端没有 72 小时这个查询参数。
+ */
+export type MetricPeriod = "10m" | "30m" | "1h" | "6h" | "1d" | "3d" | "7d";
 
 export interface MetricDataPoint {
 	ts: number;

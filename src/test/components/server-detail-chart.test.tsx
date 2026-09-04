@@ -4,15 +4,13 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ServerDetailChart from "@/components/ServerDetailChart";
-import { createServer, createSettingResponse } from "@/test/fixtures";
+import { createServer } from "@/test/fixtures";
 import { createTestQueryClient } from "@/test/utils";
 import type { NezhaServer, NezhaWebsocketResponse } from "@/types/nezha-api";
 
 const detailChartMocks = vi.hoisted(() => ({
 	connected: true,
-	fetchLoginUser: vi.fn(),
 	fetchServerMetrics: vi.fn(),
-	fetchSetting: vi.fn(),
 	lastData: null as NezhaWebsocketResponse | null,
 	messageHistory: [] as NezhaWebsocketResponse[],
 }));
@@ -76,33 +74,8 @@ vi.mock("@/hooks/use-websocket-context", () => ({
 }));
 
 vi.mock("@/lib/nezha-api", () => ({
-	fetchLoginUser: detailChartMocks.fetchLoginUser,
 	fetchServerMetrics: detailChartMocks.fetchServerMetrics,
-	fetchSetting: detailChartMocks.fetchSetting,
 }));
-
-function settingResponse(tsdbEnabled = true) {
-	return {
-		...createSettingResponse(),
-		data: {
-			...createSettingResponse().data,
-			tsdb_enabled: tsdbEnabled,
-		},
-	};
-}
-
-function loginResponse() {
-	return {
-		success: true,
-		data: {
-			id: 1,
-			username: "admin",
-			password: "",
-			created_at: "2025-01-01T00:00:00.000Z",
-			updated_at: "2025-01-01T00:00:00.000Z",
-		},
-	};
-}
 
 function metricsResponse(metric: string) {
 	return {
@@ -187,13 +160,12 @@ function seedWebSocketData() {
 describe("ServerDetailChart", () => {
 	beforeEach(() => {
 		detailChartMocks.connected = true;
-		detailChartMocks.fetchLoginUser.mockReset();
 		detailChartMocks.fetchServerMetrics.mockReset();
-		detailChartMocks.fetchSetting.mockReset();
 		detailChartMocks.lastData = null;
 		detailChartMocks.messageHistory = [];
-		detailChartMocks.fetchLoginUser.mockRejectedValue(new Error("anonymous"));
-		detailChartMocks.fetchSetting.mockResolvedValue(settingResponse());
+		detailChartMocks.fetchServerMetrics.mockImplementation(
+			(_serverId: string, metric: string) => Promise.resolve(metricsResponse(metric)),
+		);
 	});
 
 	it("renders the loading grid without websocket data", () => {
@@ -214,6 +186,7 @@ describe("ServerDetailChart", () => {
 			await screen.findByText("serverDetailChart.realtime"),
 		).toBeInTheDocument();
 		expect(screen.getByText("serverDetailChart.period1d")).toBeInTheDocument();
+		expect(screen.getByText("serverDetailChart.period3d")).toBeInTheDocument();
 		expect(screen.getByText("serverDetailChart.period7d")).toBeInTheDocument();
 		expect(screen.getByText("CPU")).toBeInTheDocument();
 		expect(screen.getByText("GPU: NVIDIA T4")).toBeInTheDocument();
@@ -230,32 +203,38 @@ describe("ServerDetailChart", () => {
 
 		await user.click(screen.getByText("serverDetailChart.period7d"));
 
-		expect(detailChartMocks.fetchServerMetrics).not.toHaveBeenCalled();
+		await waitFor(() => {
+			expect(detailChartMocks.fetchServerMetrics).toHaveBeenCalledWith(
+				"7",
+				"cpu",
+				"7d",
+			);
+		});
 	});
 
-	it("prevents historical periods when TSDB is disabled", async () => {
+	it("does not lock historical periods based on a frontend TSDB flag", async () => {
 		const user = userEvent.setup();
 		seedWebSocketData();
-		detailChartMocks.fetchSetting.mockResolvedValue(settingResponse(false));
 
 		renderWithQuery(<ServerDetailChart server_id="7" />);
 
 		await screen.findByText("serverDetailChart.realtime");
 		await user.click(screen.getByText("serverDetailChart.period1d"));
 
-		expect(detailChartMocks.fetchServerMetrics).not.toHaveBeenCalled();
+		await waitFor(() => {
+			expect(detailChartMocks.fetchServerMetrics).toHaveBeenCalledWith(
+				"7",
+				"cpu",
+				"1d",
+			);
+		});
 	});
 
 	it("fetches every historical metric group for the selected period", async () => {
 		const user = userEvent.setup();
 		seedWebSocketData();
-		Object.defineProperty(document, "cookie", {
-			configurable: true,
-			value: "session=1",
-		});
-		detailChartMocks.fetchLoginUser.mockResolvedValue(loginResponse());
 		detailChartMocks.fetchServerMetrics.mockImplementation(
-			(_serverId: number, metric: string) =>
+			(_serverId: string, metric: string) =>
 				Promise.resolve(metricsResponse(metric)),
 		);
 

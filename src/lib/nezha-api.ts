@@ -3,7 +3,7 @@
  * 文件名暂不改动，避免视觉组件的大面积重写。
  */
 import { getConfig, getHistory, getServers } from "@/cfsm/api";
-import type { CfsmLatencyPoint } from "@/cfsm/types";
+import type { CfsmLatencyPoint, HistoryRow } from "@/cfsm/types";
 import { toMetricPoints, toServerGroups } from "@/cfsm/nezha-bridge";
 import type {
 	LoginUserResponse,
@@ -16,13 +16,24 @@ import type {
 	SettingResponse,
 } from "@/types/nezha-api";
 
-export type MonitorPeriod = "1d" | "7d" | "30d";
+export type MonitorPeriod = "realtime" | MetricPeriod;
 
 const HISTORY_HOURS: Record<MetricPeriod, number> = {
+	"10m": 0.167,
+	"30m": 0.5,
+	"1h": 1,
+	"6h": 6,
 	"1d": 24,
+	// CFSM 不接受 72 小时请求；96 小时是后端支持的最小相邻窗口。
+	"3d": 96,
 	"7d": 168,
-	"30d": 168,
 };
+
+function trimRowsForPeriod(rows: HistoryRow[], period: MetricPeriod) {
+	if (period !== "3d") return rows;
+	const startAt = Date.now() - 72 * 60 * 60 * 1000;
+	return rows.filter((row) => Number(row.timestamp) >= startAt);
+}
 
 export const fetchServerGroup = async (): Promise<ServerGroupResponse> => {
 	const { servers } = await getServers();
@@ -46,24 +57,22 @@ const LATENCY_ROUTES = [
 	["bd", "百度"],
 ] as const;
 
-function numberAt(point: CfsmLatencyPoint | undefined, key: keyof CfsmLatencyPoint) {
-	const value = point?.[key];
-	return typeof value === "number" && Number.isFinite(value) ? value : 0;
+function numberAt(point: object | undefined, key: string) {
+	const value = point && (point as Record<string, unknown>)[key];
+	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 /**
  * 原主题的 Network 页按“监控器”组织折线；CFSM 列表提供四线路的真实 ping/loss
  * 窗口。这里仅转换数据形状，图表、卡片和交互仍完全复用原主题组件。
  */
-export const fetchMonitor = async (serverId: string, _period?: MonitorPeriod): Promise<MonitorResponse> => {
-	const { servers } = await getServers();
-	const server = servers.find((item) => item.id === serverId);
-	if (!server) return { success: true, data: [] };
-
-	const ping = Array.isArray(server.ping) ? server.ping : [];
-	const lossByTimestamp = new Map(
-		(Array.isArray(server.loss) ? server.loss : []).map((point) => [Number(point.ts), point]),
-	);
+function toMonitorResponse(
+	serverId: string,
+	serverName: string,
+	ping: CfsmLatencyPoint[],
+	loss: CfsmLatencyPoint[],
+): MonitorResponse {
+	const lossByTimestamp = new Map(loss.map((point) => [Number(point.ts), point]));
 	const data = LATENCY_ROUTES.flatMap(([key, monitor_name], index) => {
 		// CFSM 以 false/null 表示该线路未启用，不能误画成 0ms 曲线。
 		if (!ping.some((point) => typeof point[key] === "number")) return [];
@@ -71,15 +80,60 @@ export const fetchMonitor = async (serverId: string, _period?: MonitorPeriod): P
 			monitor_id: index + 1,
 			monitor_name,
 			display_index: index + 1,
-			server_id: server.id,
-			server_name: server.name,
+			server_id: serverId,
+			server_name: serverName,
 			created_at: ping.map((point) => Number(point.ts)).filter(Number.isFinite),
-			avg_delay: ping.map((point) => numberAt(point, key)),
-			packet_loss: ping.map((point) => numberAt(lossByTimestamp.get(Number(point.ts)), key)),
+			avg_delay: ping.map((point) => numberAt(point, key) ?? 0),
+			packet_loss: ping.map(
+				(point) => numberAt(lossByTimestamp.get(Number(point.ts)), key) ?? 0,
+			),
 		}];
 	});
 
 	return { success: true, data };
+}
+
+/**
+ * 实时延迟取 CFSM 当前服务器窗口；历史延迟必须读取 /api/history/all，
+ * 不能再错误复用首页的实时窗口。
+ */
+export const fetchMonitor = async (
+	serverId: string,
+	period: MonitorPeriod = "realtime",
+): Promise<MonitorResponse> => {
+	const { servers } = await getServers();
+	const server = servers.find((item) => item.id === serverId);
+	if (!server) return { success: true, data: [] };
+
+	if (period === "realtime") {
+		return toMonitorResponse(
+			server.id,
+			server.name,
+			Array.isArray(server.ping) ? server.ping : [],
+			Array.isArray(server.loss) ? server.loss : [],
+		);
+	}
+
+	const rows = trimRowsForPeriod(
+		await getHistory(serverId, HISTORY_HOURS[period]),
+		period,
+	);
+	const ping = rows.map((row) => ({
+		ts: Number(row.timestamp),
+		ct: row.ping_ct,
+		cu: row.ping_cu,
+		cm: row.ping_cm,
+		bd: row.ping_bd,
+	}));
+	const loss = rows.map((row) => ({
+		ts: Number(row.timestamp),
+		ct: row.loss_ct,
+		cu: row.loss_cu,
+		cm: row.loss_cm,
+		bd: row.loss_bd,
+	}));
+
+	return toMonitorResponse(server.id, server.name, ping, loss);
 };
 
 export const fetchService = async (): Promise<ServiceResponse> => ({
@@ -110,7 +164,10 @@ export const fetchServerMetrics = async (
 	metric: MetricType,
 	period: MetricPeriod = "1d",
 ): Promise<ServerMetricsResponse> => {
-	const rows = await getHistory(serverId, HISTORY_HOURS[period]);
+	const rows = trimRowsForPeriod(
+		await getHistory(serverId, HISTORY_HOURS[period]),
+		period,
+	);
 	return {
 		success: true,
 		data: {
