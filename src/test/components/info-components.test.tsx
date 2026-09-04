@@ -93,12 +93,31 @@ describe("PlanInfo and BillingInfo", () => {
 						endDate: "",
 						autoRenewal: "0",
 						cycle: "",
-						amount: "0",
+						amount: "0.00",
 					},
 				}}
 			/>,
 		);
 		expect(screen.getByText("billingInfo.free")).toBeInTheDocument();
+		expect(screen.getByText(/billingInfo.remaining: billingInfo.indefinite/)).toBeInTheDocument();
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+
+		rerender(
+			<BillingInfo
+				parsedData={{
+					billingDataMod: {
+						startDate: "2025-01-01T00:00:00.000Z",
+						endDate: "2025-01-31T00:00:00.000Z",
+						autoRenewal: "0",
+						cycle: "year",
+						amount: "0.00",
+					},
+				}}
+			/>,
+		);
+		expect(screen.getByText("billingInfo.free")).toBeInTheDocument();
+		expect(screen.getByText(/billingInfo.remaining: 16/)).toBeInTheDocument();
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
 
 		rerender(
 			<BillingInfo
