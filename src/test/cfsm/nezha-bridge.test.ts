@@ -22,7 +22,7 @@ describe("toNezhaServer", () => {
 		expect(note?.billingDataMod?.amount).toBe("");
 	});
 
-	it("formats numeric CFSM traffic limits as monthly GB plan badges", () => {
+	it("formats numeric CFSM traffic limits using GB or TB monthly plan badges", () => {
 		const server = toNezhaServer({
 			id: "edge-traffic-limit",
 			name: "edge-traffic-limit",
@@ -30,7 +30,16 @@ describe("toNezhaServer", () => {
 		});
 
 		expect(parsePublicNote(server.public_note)?.planDataMod?.trafficVol).toBe(
-			"10000GB/月",
+			"9.77TB/月",
 		);
+
+		const smallerPlan = toNezhaServer({
+			id: "edge-small-traffic-limit",
+			name: "edge-small-traffic-limit",
+			traffic_limit: "500",
+		});
+		expect(
+			parsePublicNote(smallerPlan.public_note)?.planDataMod?.trafficVol,
+		).toBe("500GB/月");
 	});
 });

@@ -27,10 +27,12 @@ function formatTrafficLimit(value: unknown) {
 	if (!/^\d+(?:\.\d+)?$/.test(trafficLimit)) return trafficLimit;
 
 	const numericValue = Number(trafficLimit);
-	const displayValue = Number.isInteger(numericValue)
-		? String(numericValue)
-		: String(numericValue);
-	return `${displayValue}GB/月`;
+	if (numericValue >= 1024) {
+		const tebibytes = (numericValue / 1024).toFixed(2).replace(/\.00$/, "");
+		return `${tebibytes}TB/月`;
+	}
+
+	return `${numericValue}GB/月`;
 }
 
 function parseGpuNames(value: CfsmServer["gpu_info"]) {
