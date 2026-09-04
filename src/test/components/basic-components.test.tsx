@@ -136,6 +136,7 @@ describe("interactive app controls", () => {
 		expect(screen.getByText("status:offline")).toBeInTheDocument();
 		fireEvent.click(screen.getByText("serverOverview.totalServers"));
 		expect(screen.getByText("status:all")).toBeInTheDocument();
+		expect(screen.queryByAltText("animated-man")).not.toBeInTheDocument();
 	});
 });
 
