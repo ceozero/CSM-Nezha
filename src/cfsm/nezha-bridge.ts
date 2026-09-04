@@ -47,6 +47,15 @@ function formatTrafficLimit(value: unknown) {
 	return `${numericValue}GB/月`;
 }
 
+function trafficLimitInGiB(value: unknown) {
+	const trafficLimit = Number.parseFloat(String(value ?? ""));
+	return Number.isFinite(trafficLimit) && trafficLimit > 0 ? trafficLimit : 0;
+}
+
+function trafficCalcType(value: unknown): "total" | "ul" | "dl" | "max" {
+	return value === "ul" || value === "dl" || value === "max" ? value : "total";
+}
+
 function parseGpuNames(value: CfsmServer["gpu_info"]) {
 	if (Array.isArray(value)) return value.map((gpu) => gpu.name).filter(Boolean);
 	if (typeof value !== "string") return [];
@@ -138,6 +147,10 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 			disk_used: megabytesToBytes(server.disk_used),
 			net_in_transfer: numberValue(server.net_rx),
 			net_out_transfer: numberValue(server.net_tx),
+			net_in_monthly_transfer: numberValue(server.net_rx_monthly),
+			net_out_monthly_transfer: numberValue(server.net_tx_monthly),
+			traffic_limit: trafficLimitInGiB(server.traffic_limit),
+			traffic_calc_type: trafficCalcType(server.traffic_calc_type),
 			net_in_speed: numberValue(server.net_in_speed),
 			net_out_speed: numberValue(server.net_out_speed),
 			uptime,

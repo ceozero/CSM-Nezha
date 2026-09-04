@@ -35,6 +35,12 @@ export interface NezhaServerStatus {
 	disk_used: number;
 	net_in_transfer: number;
 	net_out_transfer: number;
+	/** CFSM 当月下行、上行累计字节数。 */
+	net_in_monthly_transfer: number;
+	net_out_monthly_transfer: number;
+	/** CFSM 流量上限使用 GiB 数值保存，0 表示未设置上限。 */
+	traffic_limit: number;
+	traffic_calc_type: "total" | "ul" | "dl" | "max";
 	net_in_speed: number;
 	net_out_speed: number;
 	uptime: number;

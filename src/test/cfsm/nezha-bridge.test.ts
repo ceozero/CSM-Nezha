@@ -27,11 +27,20 @@ describe("toNezhaServer", () => {
 			id: "edge-traffic-limit",
 			name: "edge-traffic-limit",
 			traffic_limit: "10000.0",
+			traffic_calc_type: "max",
+			net_rx_monthly: 2 * 1024 ** 3,
+			net_tx_monthly: 3 * 1024 ** 3,
 		});
 
 		expect(parsePublicNote(server.public_note)?.planDataMod?.trafficVol).toBe(
 			"9.77TB/月",
 		);
+		expect(server.state).toMatchObject({
+			net_in_monthly_transfer: 2 * 1024 ** 3,
+			net_out_monthly_transfer: 3 * 1024 ** 3,
+			traffic_limit: 10000,
+			traffic_calc_type: "max",
+		});
 
 		const smallerPlan = toNezhaServer({
 			id: "edge-small-traffic-limit",

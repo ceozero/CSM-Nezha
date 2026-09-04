@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
 import ServerNetworkLatency from "@/components/ServerNetworkLatency";
+import ServerTrafficUsage from "@/components/ServerTrafficUsage";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { formatBytes } from "@/lib/format";
 import {
@@ -202,17 +203,19 @@ function ServerCard({
 				<ServerNetworkLatency latency={serverInfo.state.network_latency} />
 				{showNetTransfer && (
 					<section className={"flex items-center w-full justify-between gap-1"}>
-						<Badge
-							variant="secondary"
-							className="items-center flex-1 justify-center rounded-[8px] text-nowrap text-[11px] border-muted-50 shadow-md shadow-neutral-200/30 dark:shadow-none"
-						>
-							{t("serverCard.upload")}:{formatBytes(net_out_transfer)}
-						</Badge>
+						<ServerTrafficUsage
+							calcType={serverInfo.state.traffic_calc_type}
+							down={serverInfo.state.net_in_monthly_transfer}
+							limitGiB={serverInfo.state.traffic_limit}
+							up={serverInfo.state.net_out_monthly_transfer}
+						/>
 						<Badge
 							variant="outline"
-							className="items-center flex-1 justify-center rounded-[8px] text-nowrap text-[11px] shadow-md shadow-neutral-200/30 dark:shadow-none"
+							className="items-center flex-1 justify-center rounded-[8px] text-nowrap text-[11px] border-muted-50 shadow-md shadow-neutral-200/30 dark:shadow-none"
 						>
-							{t("serverCard.download")}:{formatBytes(net_in_transfer)}
+							{t("serverCard.totalTraffic")}:{formatBytes(
+								net_in_transfer + net_out_transfer,
+							)}
 						</Badge>
 					</section>
 				)}

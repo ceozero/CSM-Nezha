@@ -38,7 +38,10 @@
 		"system": "System",
 		"uptime": "Uptime",
 		"totalUpload": "Upload",
-		"totalDownload": "Download"
+		"totalDownload": "Download",
+		"monthlyTraffic": "Monthly Traffic",
+		"monthlyTrafficProgress": "Monthly traffic usage",
+		"totalTraffic": "Total Traffic"
 	},
 	"cycleTransfer": {
 		"used": "used",

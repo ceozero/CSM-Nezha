@@ -58,8 +58,7 @@ describe("ServerCard", () => {
 		);
 
 		expect(screen.getByText("serverCard.system")).toBeInTheDocument();
-		expect(screen.getByText("serverCard.upload:2.00 GiB")).toBeInTheDocument();
-		expect(screen.getByText("serverCard.download:1.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
 	});
 
 	it("allows a theme author to explicitly use the compact layout", () => {
@@ -77,7 +76,7 @@ describe("ServerCard", () => {
 		);
 
 		expect(screen.queryByText("serverCard.system")).not.toBeInTheDocument();
-		expect(screen.queryByText("serverCard.upload:2.00 GiB")).not.toBeInTheDocument();
+		expect(screen.queryByText("serverCard.totalTraffic:3.00 GiB")).not.toBeInTheDocument();
 	});
 
 	it("renders online server metrics, billing, plan data, and navigates on click", async () => {
@@ -102,10 +101,7 @@ describe("ServerCard", () => {
 		expect(screen.getByText("Windows")).toBeInTheDocument();
 		expect(screen.getByText("12.00%")).toBeInTheDocument();
 		expect(screen.getAllByText("25.00%")).toHaveLength(2);
-		expect(screen.getByText("serverCard.upload:2.00 GiB")).toBeInTheDocument();
-		expect(
-			screen.getByText("serverCard.download:1.00 GiB"),
-		).toBeInTheDocument();
+		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("1Gbps")).toBeInTheDocument();
 		expect(
 			screen.getAllByText(/billingInfo.remaining: 16/).length,
@@ -144,6 +140,29 @@ describe("ServerCard", () => {
 		expect(latency).toHaveTextContent("联通127ms丢 0%");
 		expect(latency).toHaveTextContent("移动84ms丢 0%");
 		expect(latency).toHaveTextContent("BGP51ms丢 0%");
+	});
+
+	it("uses the left transfer box for the monthly quota and the right one for total traffic", () => {
+		const server = createServer({
+			name: "edge-monthly-traffic",
+			state: {
+				net_in_transfer: 1024 ** 3,
+				net_out_transfer: 2 * 1024 ** 3,
+				net_in_monthly_transfer: 3 * 1024 ** 3,
+				net_out_monthly_transfer: 2 * 1024 ** 3,
+				traffic_limit: 10,
+				traffic_calc_type: "total",
+			},
+		});
+
+		renderWithProviders(
+			<ServerCard now={Date.parse("2025-01-01T00:00:20.000Z")} serverInfo={server} />,
+		);
+
+		const monthlyTraffic = screen.getByLabelText("serverCard.monthlyTraffic");
+		expect(monthlyTraffic).toHaveTextContent("5.00 GiB / 10.00 GiB");
+		expect(monthlyTraffic).toHaveTextContent("50.0%");
+		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
 	});
 
 	it("renders a compact offline card without live metric blocks", () => {
