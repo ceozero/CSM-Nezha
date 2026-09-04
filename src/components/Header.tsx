@@ -72,7 +72,7 @@ function Header() {
 	const customLogo = window.CustomLogo || defaultLogo;
 
 	// @ts-expect-error CustomDesc is a global variable
-	const customDesc = window.CustomDesc || t("nezha");
+	const customDesc = window.CustomDesc as string | undefined;
 
 	const customMobileBackgroundImage =
 		window.CustomMobileBackgroundImage !== ""
@@ -139,13 +139,17 @@ function Header() {
 					) : (
 						siteName || "NEZHA"
 					)}
-					<Separator
-						orientation="vertical"
-						className="mx-2 hidden h-4 w-px md:block"
-					/>
-					<p className="hidden text-sm font-medium opacity-40 md:block">
-						{customDesc}
-					</p>
+					{customDesc && (
+						<>
+							<Separator
+								orientation="vertical"
+								className="mx-2 hidden h-4 w-px md:block"
+							/>
+							<p className="hidden text-sm font-medium opacity-40 md:block">
+								{customDesc}
+							</p>
+						</>
+					)}
 				</section>
 				<section className="flex items-center gap-2 header-handles">
 					<div className="hidden sm:flex items-center gap-2">
