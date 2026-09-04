@@ -326,7 +326,7 @@ describe("WebSocketProvider", () => {
 		expect(screen.getByTestId("message-count")).toHaveTextContent("60");
 	});
 
-	it("短暂切回页面时只恢复 WebSocket，不重复拉取服务器列表", async () => {
+	it("切换标签页时保持现有 WebSocket，不触发重新连接或数据刷新", async () => {
 		renderWebSocketProvider(<WebSocketProbe />);
 		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
 		const socket = FakeWebSocket.instances[0];
@@ -343,7 +343,8 @@ describe("WebSocketProvider", () => {
 		});
 		act(() => document.dispatchEvent(new Event("visibilitychange")));
 
-		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(2));
+		expect(FakeWebSocket.instances).toHaveLength(1);
+		expect(screen.getByText("connected")).toBeInTheDocument();
 		expect(cfsmMocks.getServers).toHaveBeenCalledTimes(1);
 	});
 
