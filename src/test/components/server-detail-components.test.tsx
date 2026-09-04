@@ -129,9 +129,14 @@ describe("ServerDetailOverview", () => {
 		expect(screen.getByText(/linux - 6.8/)).toBeInTheDocument();
 		expect(screen.getByText(/AMD EPYC/)).toBeInTheDocument();
 		expect(screen.getByText("NVIDIA T4")).toBeInTheDocument();
-		expect(screen.getByText("2.00 GiB")).toBeInTheDocument();
-		expect(screen.getByText("1.00 GiB")).toBeInTheDocument();
-		expect(screen.getByText("serverCard.monthlyTraffic")).toBeInTheDocument();
+		expect(screen.getByText("serverDetail.totalUpload")).toBeInTheDocument();
+		expect(screen.getAllByText("↑ 2.00 GiB")).toHaveLength(2);
+		expect(screen.getByText("serverDetail.totalDownload")).toBeInTheDocument();
+		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("serverDetail.monthlyUpload")).toBeInTheDocument();
+		expect(screen.getByText("serverDetail.monthlyDownload")).toBeInTheDocument();
+		expect(screen.getByText("↓ 3.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("serverDetail.monthlyQuota")).toBeInTheDocument();
 		expect(screen.getByText("5.00 GiB / 10.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("50.0%")).toBeInTheDocument();
 

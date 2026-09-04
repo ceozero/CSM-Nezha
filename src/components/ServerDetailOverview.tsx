@@ -88,9 +88,6 @@ export default function ServerDetailOverview({
 		platform_version,
 		cpu_info,
 		gpu_info,
-		load_1,
-		load_5,
-		load_15,
 		net_out_transfer,
 		net_in_transfer,
 		last_active_time_string,
@@ -288,72 +285,28 @@ export default function ServerDetailOverview({
 				)}
 			</section>
 			<section className="flex flex-wrap gap-2 mt-1">
-				<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
-					<CardContent className="px-1.5 py-1">
-						<section className="flex flex-col items-start gap-0.5">
-							<p className="text-xs text-muted-foreground">{"Load"}</p>
-							<div className="grid grid-cols-3 gap-2 text-xs tabular-nums">
-								{[
-									{ label: "1m", value: load_1 },
-									{ label: "5m", value: load_5 },
-									{ label: "15m", value: load_15 },
-								].map(({ label, value }) => (
-									<div key={label} className="flex items-center gap-1">
-										<span className="text-[10px] text-muted-foreground">
-											{label}
-										</span>
-										<NumericText value={`${value}`} className="text-xs" />
-									</div>
-								))}
-							</div>
-						</section>
-					</CardContent>
-				</Card>
-				{net_out_transfer ? (
+				{[
+					{ label: t("serverDetail.totalUpload"), value: `↑ ${formatBytes(net_out_transfer)}` },
+					{ label: t("serverDetail.totalDownload"), value: `↓ ${formatBytes(net_in_transfer)}` },
+					{ label: t("serverDetail.monthlyUpload"), value: `↑ ${formatBytes(monthlyUp)}` },
+					{ label: t("serverDetail.monthlyDownload"), value: `↓ ${formatBytes(monthlyDown)}` },
+				].map(({ label, value }) => (
+					<Card key={label} className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
+						<CardContent className="px-1.5 py-1">
+							<section className="flex flex-col items-start gap-0.5">
+								<p className="text-xs text-muted-foreground">{label}</p>
+								<NumericText value={value} className="text-xs tabular-nums" />
+							</section>
+						</CardContent>
+					</Card>
+				))}
+				{monthlyLimit > 0 && (
 					<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
 						<CardContent className="px-1.5 py-1">
 							<section className="flex flex-col items-start gap-0.5">
 								<p className="text-xs text-muted-foreground">
-									{t("serverDetail.upload")}
+									{t("serverDetail.monthlyQuota")}
 								</p>
-								{net_out_transfer ? (
-									<NumericText
-										value={formatBytes(net_out_transfer)}
-										className="text-xs"
-									/>
-								) : (
-									<div className="text-xs"> {t("serverDetail.unknown")}</div>
-								)}
-							</section>
-						</CardContent>
-					</Card>
-				) : null}
-				{net_in_transfer ? (
-					<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
-						<CardContent className="px-1.5 py-1">
-							<section className="flex flex-col items-start gap-0.5">
-								<p className="text-xs text-muted-foreground">
-									{t("serverDetail.download")}
-								</p>
-								{net_in_transfer ? (
-									<NumericText
-										value={formatBytes(net_in_transfer)}
-										className="text-xs"
-									/>
-								) : (
-									<div className="text-xs"> {t("serverDetail.unknown")}</div>
-								)}
-							</section>
-						</CardContent>
-					</Card>
-				) : null}
-				<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
-					<CardContent className="px-1.5 py-1">
-						<section className="flex flex-col items-start gap-0.5">
-							<p className="text-xs text-muted-foreground">
-								{t("serverCard.monthlyTraffic")}
-							</p>
-							{monthlyLimit > 0 ? (
 								<div className="flex items-center gap-1 text-xs tabular-nums">
 									<NumericText
 										value={`${formatBytes(monthlyUsed)} / ${formatBytes(monthlyLimit)}`}
@@ -363,19 +316,10 @@ export default function ServerDetailOverview({
 										{monthlyPercent.toFixed(1)}%
 									</span>
 								</div>
-							) : (
-								<div className="flex items-center gap-2 text-xs tabular-nums">
-									<span className="text-sky-600 dark:text-sky-400">
-										↑ {formatBytes(monthlyUp)}
-									</span>
-									<span className="text-violet-600 dark:text-violet-400">
-										↓ {formatBytes(monthlyDown)}
-									</span>
-								</div>
-							)}
-						</section>
-					</CardContent>
-				</Card>
+							</section>
+						</CardContent>
+					</Card>
+				)}
 			</section>
 			<section className="flex flex-wrap gap-2 mt-1">
 				{server?.state.temperatures &&

@@ -73,6 +73,11 @@
 		"system": "系统",
 		"upload": "上传",
 		"download": "下载",
+		"totalUpload": "总上传",
+		"totalDownload": "总下载",
+		"monthlyUpload": "月上传",
+		"monthlyDownload": "月下载",
+		"monthlyQuota": "月限额",
 		"lastActive": "最后上报时间",
 		"temperature": "温度",
 		"bootTime": "启动时间"
