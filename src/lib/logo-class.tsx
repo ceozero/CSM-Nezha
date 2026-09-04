@@ -130,6 +130,26 @@ export function GetOsName(platform: string): string {
 	return "Linux";
 }
 
+/**
+ * CFSM 在同源静态目录中提供系统图标。保留原主题卡片的图标位置与尺寸，
+ * 但不再依赖未被主题目录打包的第三方字体图标 CDN。
+ */
+export function getCfsmOsIcon(platform: string): string {
+	const value = platform.toLowerCase();
+	if (value.includes("windows")) return "/os-icons/os-windows.svg";
+	if (value.includes("debian")) return "/os-icons/os-debian.svg";
+	if (value.includes("ubuntu")) return "/os-icons/os-ubuntu.svg";
+	if (value.includes("alpine")) return "/os-icons/os-alpine.webp";
+	if (value.includes("arch")) return "/os-icons/os-arch.svg";
+	if (value.includes("centos")) return "/os-icons/os-centos.svg";
+	if (value.includes("fedora")) return "/os-icons/os-fedora.svg";
+	if (value.includes("rocky")) return "/os-icons/os-rocky.svg";
+	if (value.includes("red hat") || value.includes("redhat")) return "/os-icons/os-redhat.svg";
+	if (value.includes("mac") || value.includes("darwin")) return "/os-icons/os-macos.svg";
+	if (value.includes("openwrt")) return "/os-icons/os-openwrt.svg";
+	return "/os-icons/os-unknown.svg";
+}
+
 export function MageMicrosoftWindows(props: SVGProps<SVGSVGElement>) {
 	return (
 		<svg

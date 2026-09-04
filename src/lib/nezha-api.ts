@@ -64,16 +64,20 @@ export const fetchMonitor = async (serverId: string, _period?: MonitorPeriod): P
 	const lossByTimestamp = new Map(
 		(Array.isArray(server.loss) ? server.loss : []).map((point) => [Number(point.ts), point]),
 	);
-	const data = LATENCY_ROUTES.map(([key, monitor_name], index) => ({
-		monitor_id: index + 1,
-		monitor_name,
-		display_index: index + 1,
-		server_id: server.id,
-		server_name: server.name,
-		created_at: ping.map((point) => Number(point.ts)).filter(Number.isFinite),
-		avg_delay: ping.map((point) => numberAt(point, key)),
-		packet_loss: ping.map((point) => numberAt(lossByTimestamp.get(Number(point.ts)), key)),
-	})).filter((monitor) => monitor.created_at.length > 0);
+	const data = LATENCY_ROUTES.flatMap(([key, monitor_name], index) => {
+		// CFSM 以 false/null 表示该线路未启用，不能误画成 0ms 曲线。
+		if (!ping.some((point) => typeof point[key] === "number")) return [];
+		return [{
+			monitor_id: index + 1,
+			monitor_name,
+			display_index: index + 1,
+			server_id: server.id,
+			server_name: server.name,
+			created_at: ping.map((point) => Number(point.ts)).filter(Number.isFinite),
+			avg_delay: ping.map((point) => numberAt(point, key)),
+			packet_loss: ping.map((point) => numberAt(lossByTimestamp.get(Number(point.ts)), key)),
+		}];
+	});
 
 	return { success: true, data };
 };

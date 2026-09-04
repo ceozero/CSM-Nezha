@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import defaultLogo from "../../public/apple-touch-icon.png?url";
 import { ModeToggle } from "@/components/ThemeSwitcher";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -68,7 +69,7 @@ function Header() {
 	const siteName = settingData?.data?.config?.site_name;
 
 	// @ts-expect-error CustomLogo is a global variable
-	const customLogo = window.CustomLogo || "/apple-touch-icon.png";
+	const customLogo = window.CustomLogo || defaultLogo;
 
 	// @ts-expect-error CustomDesc is a global variable
 	const customDesc = window.CustomDesc || t("nezha");

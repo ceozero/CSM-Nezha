@@ -5,9 +5,8 @@ import ServerFlag from "@/components/ServerFlag";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { formatBytes } from "@/lib/format";
 import {
-	GetFontLogoClass,
+	getCfsmOsIcon,
 	GetOsName,
-	MageMicrosoftWindows,
 } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils";
@@ -101,11 +100,11 @@ function ServerCardInline({
 							className={"items-center flex flex-row gap-2 whitespace-nowrap"}
 						>
 							<div className="text-xs font-semibold">
-								{platform.includes("Windows") ? (
-									<MageMicrosoftWindows className="size-[10px]" />
-								) : (
-									<p className={`fl-${GetFontLogoClass(platform)}`} />
-								)}
+								<img
+									alt=""
+									className="size-[10px] object-contain"
+									src={getCfsmOsIcon(platform)}
+								/>
 							</div>
 							<div className={"flex w-14 flex-col"}>
 								<p className="text-xs text-muted-foreground">

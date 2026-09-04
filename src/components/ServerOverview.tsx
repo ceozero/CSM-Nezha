@@ -3,6 +3,7 @@ import {
 	ArrowUpCircleIcon,
 } from "@heroicons/react/20/solid";
 import { useTranslation } from "react-i18next";
+import defaultIllustration from "../../public/animated-man.webp?url";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStatus } from "@/hooks/use-status";
 import { formatBytes } from "@/lib/format";
@@ -35,7 +36,7 @@ export default function ServerOverview({
 	const disableAnimatedMan = window.DisableAnimatedMan as boolean;
 
 	// @ts-expect-error CustomIllustration is a global variable
-	const customIllustration = window.CustomIllustration || "/animated-man.webp";
+	const customIllustration = window.CustomIllustration || defaultIllustration;
 
 	const customBackgroundImage =
 		(window.CustomBackgroundImage as string) !== ""
