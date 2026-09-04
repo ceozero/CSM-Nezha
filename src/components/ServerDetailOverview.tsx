@@ -88,6 +88,9 @@ export default function ServerDetailOverview({
 		platform_version,
 		cpu_info,
 		gpu_info,
+		load_1,
+		load_5,
+		load_15,
 		net_out_transfer,
 		net_in_transfer,
 		last_active_time_string,
@@ -371,6 +374,29 @@ export default function ServerDetailOverview({
 								}
 								className="text-xs"
 							/>
+						</section>
+					</CardContent>
+				</Card>
+				<Card className="rounded-[10px] bg-transparent border-none shadow-none ring-0">
+					<CardContent className="px-1.5 py-1">
+						<section className="flex flex-col items-start gap-0.5">
+							<p className="text-xs text-muted-foreground">
+								{t("serverDetail.load")}
+							</p>
+							<div className="grid grid-cols-3 gap-2 text-xs tabular-nums">
+								{[
+									{ label: t("serverDetail.load1m"), value: load_1 },
+									{ label: t("serverDetail.load5m"), value: load_5 },
+									{ label: t("serverDetail.load15m"), value: load_15 },
+								].map(({ label, value }) => (
+									<div key={label} className="flex items-center gap-1">
+										<span className="text-[10px] text-muted-foreground">
+											{label}
+										</span>
+										<NumericText value={`${value}`} className="text-xs" />
+									</div>
+								))}
+							</div>
 						</section>
 					</CardContent>
 				</Card>

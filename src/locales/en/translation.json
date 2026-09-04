@@ -78,6 +78,10 @@
 		"monthlyUpload": "Monthly Upload",
 		"monthlyDownload": "Monthly Download",
 		"monthlyQuota": "Monthly Quota",
+		"load": "Load",
+		"load1m": "1 min",
+		"load5m": "5 min",
+		"load15m": "15 min",
 		"lastActive": "Last active time",
 		"temperature": "Temperature",
 		"bootTime": "Boot time"

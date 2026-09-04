@@ -78,6 +78,10 @@
 		"monthlyUpload": "月上传",
 		"monthlyDownload": "月下载",
 		"monthlyQuota": "月限额",
+		"load": "负载",
+		"load1m": "1分",
+		"load5m": "5分",
+		"load15m": "15分",
 		"lastActive": "最后上报时间",
 		"temperature": "温度",
 		"bootTime": "启动时间"

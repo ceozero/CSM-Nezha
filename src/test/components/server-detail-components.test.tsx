@@ -139,6 +139,10 @@ describe("ServerDetailOverview", () => {
 		expect(screen.getByText("serverDetail.monthlyQuota")).toBeInTheDocument();
 		expect(screen.getByText("5.00 GiB / 10.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("50.0%")).toBeInTheDocument();
+		expect(screen.getByText("serverDetail.load")).toBeInTheDocument();
+		expect(screen.getByText("0.12")).toBeInTheDocument();
+		expect(screen.getByText("0.45")).toBeInTheDocument();
+		expect(screen.getByText("0.78")).toBeInTheDocument();
 
 		await user.click(
 			screen.getByRole("button", { name: /serverDetail.temperature/ }),
