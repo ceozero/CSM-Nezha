@@ -5,7 +5,8 @@ export interface NezhaWebsocketResponse {
 }
 
 export interface NezhaServer {
-	id: number;
+	// CFSM 使用 UUID/字符串 ID；保留 Nezha 的对象外形，仅放宽 ID 类型。
+	id: string;
 	name: string;
 	public_note: string;
 	last_active: string;
@@ -64,7 +65,7 @@ export interface ServerGroup {
 		updated_at: string;
 		name: string;
 	};
-	servers: number[];
+	servers: string[];
 }
 
 export interface LoginUserResponse {
@@ -95,7 +96,7 @@ export interface NezhaMonitor {
 	monitor_id: number;
 	monitor_name: string;
 	display_index?: number;
-	server_id: number;
+	server_id: string;
 	server_name: string;
 	created_at: number[];
 	avg_delay: number[];
@@ -189,7 +190,7 @@ export interface MetricDataPoint {
 }
 
 export interface ServerMetricsData {
-	server_id: number;
+	server_id: string;
 	server_name: string;
 	metric: string;
 	data_points: MetricDataPoint[];

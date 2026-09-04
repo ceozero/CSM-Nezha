@@ -42,7 +42,7 @@ export function createServer(
 	overrides: NezhaServerOverrides = {},
 ): NezhaServer {
 	return {
-		id: 1,
+		id: "1",
 		name: "edge-1",
 		public_note: "",
 		last_active: "2025-01-01T00:00:00.000Z",

@@ -22,11 +22,11 @@ const Footer: React.FC = () => {
 					<div className="flex items-center gap-1">
 						&copy;2020-{new Date().getFullYear()}{" "}
 						<a
-							href={"https://github.com/naiba/nezha"}
+							href={"https://github.com/huilang-me/CF-Server-Monitor/"}
 							target="_blank"
 							rel="noopener"
 						>
-							Nezha
+							Powered by CF-Server-Monitor
 						</a>
 						<p>{settingData?.data?.version || ""}</p>
 					</div>
@@ -39,15 +39,15 @@ const Footer: React.FC = () => {
 						<section>
 							{t("footer.themeBy")}
 							<a
-								href={"https://github.com/hamster1963/nezha-dash"}
+								href={"https://github.com/hamster1963/nezha-dash-v2"}
 								target="_blank"
 								rel="noopener"
 							>
-								nezha-dash
+								nezha-dash-v2
 							</a>
 							{import.meta.env.VITE_GIT_HASH && (
 								<a
-									href={`https://github.com/hamster1963/nezha-dash-v1/commit/${import.meta.env.VITE_GIT_HASH}`}
+								href={`https://github.com/hamster1963/nezha-dash-v2/commit/${import.meta.env.VITE_GIT_HASH}`}
 									className="ml-1"
 								>
 									({import.meta.env.VITE_GIT_HASH})

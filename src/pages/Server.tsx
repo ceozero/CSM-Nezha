@@ -216,7 +216,7 @@ export default function Servers({
 	}, [nezhaWsData, restoreScrollPosition]);
 
 	const groupServerIdSets = useMemo(() => {
-		const sets = new Map<string, Set<number>>();
+		const sets = new Map<string, Set<string>>();
 
 		for (const item of groupData?.data ?? []) {
 			if (Array.isArray(item.servers)) {

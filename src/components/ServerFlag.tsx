@@ -51,7 +51,12 @@ export default function ServerFlag({
 	return (
 		<span className={cn("text-[12px] text-muted-foreground", className)}>
 			{forceUseSvgFlag || !supportsEmojiFlags || !canRenderEmojiFlag ? (
-				<span className={`fi fi-${normalizedCountryCode.toLowerCase()}`} />
+				<img
+					alt=""
+					className="inline-block h-3 w-4 object-cover"
+					// CFSM 提供旗帜静态资源；不再依赖原主题的外部 flag-icons CDN。
+					src={`/flags/${normalizedCountryCode.toLowerCase()}.svg`}
+				/>
 			) : (
 				getUnicodeFlagIcon(normalizedCountryCode)
 			)}

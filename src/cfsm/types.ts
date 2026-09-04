@@ -7,6 +7,15 @@ export interface DiskIoMetrics {
 	util?: number;
 }
 
+/** CFSM 三网/百度线路的真实延迟或丢包采样点。 */
+export interface CfsmLatencyPoint {
+	ts: number;
+	ct?: number;
+	cu?: number;
+	cm?: number;
+	bd?: number;
+}
+
 export interface CfsmServer {
 	id: string;
 	name: string;
@@ -42,6 +51,9 @@ export interface CfsmServer {
 	timestamp?: number;
 	is_online?: boolean;
 	agent_version?: string;
+	/** 仅在后台开启三网详情时由 /api/servers 返回。 */
+	ping?: CfsmLatencyPoint[];
+	loss?: CfsmLatencyPoint[];
 	[key: string]: unknown;
 }
 

@@ -48,7 +48,7 @@ export default function ServerDetail() {
 			{currentTab === tabs[0] && <ServerDetailChart server_id={server_id} />}
 			{currentTab === tabs[1] && (
 				<Suspense fallback={<NetworkChartLoading />}>
-					<NetworkChart server_id={Number(server_id)} show={true} />
+					<NetworkChart server_id={server_id} show={true} />
 				</Suspense>
 			)}
 		</div>

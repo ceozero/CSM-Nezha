@@ -26,7 +26,7 @@ const filteredFeatures = geoJson.features.filter(
 );
 
 type TooltipServer = {
-	id: number;
+	id: string;
 	name: string;
 	status: boolean;
 };

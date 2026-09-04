@@ -1,3 +1,10 @@
+/**
+ * 兼容层：保留 nezha-dash-v2 组件调用形状，实际请求全部转至 CFSM 公开 API。
+ * 文件名暂不改动，避免视觉组件的大面积重写。
+ */
+import { getConfig, getHistory, getServers } from "@/cfsm/api";
+import type { CfsmLatencyPoint } from "@/cfsm/types";
+import { toMetricPoints, toServerGroups } from "@/cfsm/nezha-bridge";
 import type {
 	LoginUserResponse,
 	MetricPeriod,
@@ -9,104 +16,104 @@ import type {
 	SettingResponse,
 } from "@/types/nezha-api";
 
-let lastestRefreshTokenAt = 0;
+export type MonitorPeriod = "1d" | "7d" | "30d";
 
-const getCookieValue = (name: string): string | undefined => {
-	const cookie = document.cookie
-		.split("; ")
-		.find((item) => item.startsWith(`${name}=`));
-
-	if (!cookie) {
-		return undefined;
-	}
-
-	return decodeURIComponent(cookie.split("=").slice(1).join("="));
-};
-
-const getCsrfToken = (): string => {
-	return getCookieValue("nz-csrf") || "";
+const HISTORY_HOURS: Record<MetricPeriod, number> = {
+	"1d": 24,
+	"7d": 168,
+	"30d": 168,
 };
 
 export const fetchServerGroup = async (): Promise<ServerGroupResponse> => {
-	const response = await fetch("/api/v1/server-group");
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-	return data;
+	const { servers } = await getServers();
+	return { success: true, data: toServerGroups(servers) };
 };
 
 export const fetchLoginUser = async (): Promise<LoginUserResponse> => {
-	const response = await fetch("/api/v1/profile");
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-
-	// auto refresh token
-	if (
-		document.cookie &&
-		(!lastestRefreshTokenAt ||
-			Date.now() - lastestRefreshTokenAt > 1000 * 60 * 60)
-	) {
-		lastestRefreshTokenAt = Date.now();
-		const csrfToken = getCsrfToken();
-		fetch("/api/v1/refresh-token", {
-			method: "POST",
-			headers: {
-				"X-CSRF-Token": csrfToken,
-			},
-		});
-	}
-
-	return data;
+	const config = await getConfig();
+	return {
+		success: true,
+		data: config.authorization
+			? { id: 1, username: "cfsm", password: "", created_at: "", updated_at: "" }
+			: { id: 0, username: "", password: "", created_at: "", updated_at: "" },
+	};
 };
 
-export type MonitorPeriod = "1d" | "7d" | "30d";
+const LATENCY_ROUTES = [
+	["ct", "电信"],
+	["cu", "联通"],
+	["cm", "移动"],
+	["bd", "百度"],
+] as const;
 
-export const fetchMonitor = async (
-	server_id: number,
-	period?: MonitorPeriod,
-): Promise<MonitorResponse> => {
-	const query = period ? `?period=${period}` : "";
-	const response = await fetch(`/api/v1/server/${server_id}/service${query}`);
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-	return data;
+function numberAt(point: CfsmLatencyPoint | undefined, key: keyof CfsmLatencyPoint) {
+	const value = point?.[key];
+	return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+/**
+ * 原主题的 Network 页按“监控器”组织折线；CFSM 列表提供四线路的真实 ping/loss
+ * 窗口。这里仅转换数据形状，图表、卡片和交互仍完全复用原主题组件。
+ */
+export const fetchMonitor = async (serverId: string, _period?: MonitorPeriod): Promise<MonitorResponse> => {
+	const { servers } = await getServers();
+	const server = servers.find((item) => item.id === serverId);
+	if (!server) return { success: true, data: [] };
+
+	const ping = Array.isArray(server.ping) ? server.ping : [];
+	const lossByTimestamp = new Map(
+		(Array.isArray(server.loss) ? server.loss : []).map((point) => [Number(point.ts), point]),
+	);
+	const data = LATENCY_ROUTES.map(([key, monitor_name], index) => ({
+		monitor_id: index + 1,
+		monitor_name,
+		display_index: index + 1,
+		server_id: server.id,
+		server_name: server.name,
+		created_at: ping.map((point) => Number(point.ts)).filter(Number.isFinite),
+		avg_delay: ping.map((point) => numberAt(point, key)),
+		packet_loss: ping.map((point) => numberAt(lossByTimestamp.get(Number(point.ts)), key)),
+	})).filter((monitor) => monitor.created_at.length > 0);
+
+	return { success: true, data };
 };
 
-export const fetchService = async (): Promise<ServiceResponse> => {
-	const response = await fetch("/api/v1/service");
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-	return data;
-};
+export const fetchService = async (): Promise<ServiceResponse> => ({
+	success: true,
+	data: { services: {}, cycle_transfer_stats: {} },
+});
 
 export const fetchSetting = async (): Promise<SettingResponse> => {
-	const response = await fetch("/api/v1/setting");
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-	return data;
+	const config = await getConfig();
+	return {
+		success: true,
+		data: {
+			config: {
+				debug: false,
+				language: config.default_language === "en" ? "en-US" : "zh-CN",
+				site_name: config.site_title,
+				user_template: "",
+				admin_template: "",
+				custom_code: "",
+			},
+			version: config.version,
+		},
+	};
 };
 
 export const fetchServerMetrics = async (
-	server_id: number,
+	serverId: string,
 	metric: MetricType,
-	period?: MetricPeriod,
+	period: MetricPeriod = "1d",
 ): Promise<ServerMetricsResponse> => {
-	const query = period
-		? `?metric=${metric}&period=${period}`
-		: `?metric=${metric}`;
-	const response = await fetch(`/api/v1/server/${server_id}/metrics${query}`);
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error);
-	}
-	return data;
+	const rows = await getHistory(serverId, HISTORY_HOURS[period]);
+	return {
+		success: true,
+		data: {
+			server_id: serverId,
+			server_name: "",
+			metric,
+			data_points: toMetricPoints(rows, metric),
+		},
+	};
 };

@@ -123,7 +123,7 @@ export function NetworkChart({
 	server_id,
 	show,
 }: {
-	server_id: number;
+	server_id: string;
 	show: boolean;
 }) {
 	const { t } = useTranslation();
@@ -161,7 +161,11 @@ export function NetworkChart({
 
 	if (!monitorData) return <NetworkChartLoading />;
 
-	if (monitorData?.success && !monitorData.data) {
+	if (
+		!monitorData.success ||
+		!Array.isArray(monitorData.data) ||
+		monitorData.data.length === 0
+	) {
 		return (
 			<>
 				<div className="flex flex-col items-center justify-center">

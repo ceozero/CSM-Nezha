@@ -108,7 +108,7 @@ function metricsResponse(metric: string) {
 	return {
 		success: true,
 		data: {
-			server_id: 7,
+			server_id: "7",
 			server_name: "edge-chart-detail",
 			metric,
 			data_points: [
@@ -138,7 +138,7 @@ function renderWithQuery(ui: React.ReactElement) {
 function seedWebSocketData() {
 	const baseNow = Date.parse("2025-01-01T00:00:20.000Z");
 	const server = createServer({
-		id: 7,
+		id: "7",
 		name: "edge-chart-detail",
 		host: {
 			gpu: ["NVIDIA T4"],
@@ -162,7 +162,7 @@ function seedWebSocketData() {
 	detailChartMocks.messageHistory = [0, 1, 2].map((index) =>
 		websocketPayload(
 			createServer({
-				id: 7,
+				id: "7",
 				host: {
 					gpu: ["NVIDIA T4"],
 				},
@@ -278,7 +278,7 @@ describe("ServerDetailChart", () => {
 		]) {
 			await waitFor(() => {
 				expect(detailChartMocks.fetchServerMetrics).toHaveBeenCalledWith(
-					7,
+					"7",
 					metric,
 					"1d",
 				);

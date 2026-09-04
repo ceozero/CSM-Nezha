@@ -327,7 +327,7 @@ export function parsePublicNote(publicNote: string): PublicNoteData | null {
 }
 
 // Function to handle public_note with sessionStorage
-export function handlePublicNote(serverId: number, publicNote: string): string {
+export function handlePublicNote(serverId: string, publicNote: string): string {
 	const storageKey = `server_${serverId}_public_note`;
 	const storedNote = sessionStorage.getItem(storageKey);
 

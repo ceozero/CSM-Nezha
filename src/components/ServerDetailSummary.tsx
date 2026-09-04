@@ -7,7 +7,7 @@ import { formatNezhaInfo } from "@/lib/utils";
 export default function ServerDetailSummary({
 	server_id,
 }: {
-	server_id: number;
+	server_id: string;
 }) {
 	const { lastData, connected } = useWebSocketContext();
 
@@ -21,7 +21,7 @@ export default function ServerDetailSummary({
 		return null;
 	}
 
-	const server = nezhaWsData.servers.find((s) => s.id === Number(server_id));
+	const server = nezhaWsData.servers.find((s) => s.id === server_id);
 
 	if (!server) {
 		return null;

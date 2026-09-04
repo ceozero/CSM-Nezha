@@ -266,7 +266,7 @@ export default function ServerDetailChart({
 		return <ServerDetailChartLoading />;
 	}
 
-	const server = nezhaWsData.servers.find((s) => s.id === Number(server_id));
+	const server = nezhaWsData.servers.find((s) => s.id === server_id);
 
 	if (!server) {
 		return <ServerDetailChartLoading />;
@@ -353,7 +353,7 @@ export default function ServerDetailChart({
 }
 
 function useHistoricalData<T>(
-	serverId: number,
+	serverId: string,
 	metricName: string,
 	period: ChartPeriod,
 	transformData: (timestamp: number, value: number) => T,
@@ -430,7 +430,7 @@ function GpuChart({
 	period,
 }: {
 	now: number;
-	id: number;
+	id: string;
 	index: number;
 	gpuStat: number;
 	gpuName?: string;

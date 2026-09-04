@@ -12,7 +12,13 @@ import { useSort } from "@/hooks/use-sort";
 import { useStatus } from "@/hooks/use-status";
 import { useTooltip } from "@/hooks/use-tooltip";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
-import { createServer } from "@/test/fixtures";
+
+const cfsmMocks = vi.hoisted(() => ({
+	getConfig: vi.fn(),
+	getServers: vi.fn(),
+}));
+
+vi.mock("@/cfsm/api", () => cfsmMocks);
 
 class FakeWebSocket {
 	static readonly CONNECTING = 0;
@@ -27,6 +33,7 @@ class FakeWebSocket {
 	onclose: ((event: CloseEvent) => void) | null = null;
 	onmessage: ((event: MessageEvent<string>) => void) | null = null;
 	onerror: ((event: Event) => void) | null = null;
+	send = vi.fn();
 
 	constructor(url: string) {
 		this.url = url;
@@ -239,31 +246,45 @@ describe("WebSocketProvider", () => {
 	beforeEach(() => {
 		FakeWebSocket.instances = [];
 		vi.stubGlobal("WebSocket", FakeWebSocket);
+		cfsmMocks.getConfig.mockReset();
+		cfsmMocks.getServers.mockReset();
+		cfsmMocks.getConfig.mockResolvedValue({ frontend_ws_timeout_minutes: 0 });
+		cfsmMocks.getServers.mockResolvedValue({
+			servers: [{
+				id: "node-1",
+				name: "初始节点",
+				ram_total: 1024,
+				disk_total: 1024,
+				last_updated: Date.now(),
+			}],
+		});
 	});
 
 	function renderWebSocketProvider(children: ReactNode) {
-		return render(
-			<WebSocketProvider url="/api/v1/ws/server">{children}</WebSocketProvider>,
-		);
+		return render(<WebSocketProvider>{children}</WebSocketProvider>);
 	}
 
 	function websocketPayload(serverName: string) {
 		return JSON.stringify({
-			now: Date.parse("2025-01-01T00:00:20.000Z"),
-			servers: [createServer({ name: serverName })],
+			type: "batchUpdate",
+			updates: [{
+				serverId: "node-1",
+				samples: [{ ts: Date.parse("2025-01-01T00:00:20.000Z"), data: { name: serverName, cpu: 50 } }],
+			}],
 		});
 	}
 
-	it("connects with a ws URL and records incoming messages", () => {
+	it("连接 CFSM WebSocket、订阅初始服务器并记录增量快照", async () => {
 		renderWebSocketProvider(<WebSocketProbe />);
-
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
 		const socket = FakeWebSocket.instances[0];
-		expect(socket.url).toBe("wss://localhost/api/v1/ws/server");
+		expect(socket.url).toBe("wss://localhost/api/ws?subscribe=all");
 
 		act(() => {
 			socket.open();
 		});
 		expect(screen.getByText("connected")).toBeInTheDocument();
+		expect(socket.send).toHaveBeenCalledWith(JSON.stringify({ type: "subscribe", scope: "all", ids: ["node-1"] }));
 
 		act(() => {
 			socket.message(websocketPayload("first"));
@@ -271,81 +292,38 @@ describe("WebSocketProvider", () => {
 		});
 
 		expect(screen.getByText("second")).toBeInTheDocument();
-		expect(screen.getByTestId("message-count")).toHaveTextContent("2");
-	});
-
-	it("normalizes missing and non-array server collections", () => {
-		renderWebSocketProvider(<WebSocketProbe />);
-		const socket = FakeWebSocket.instances[0];
-		const now = Date.parse("2025-01-01T00:00:20.000Z");
-
-		act(() => {
-			socket.open();
-			socket.message(JSON.stringify({ now }));
-			socket.message(JSON.stringify({ now, servers: null }));
-			socket.message(JSON.stringify({ now, servers: { invalid: true } }));
-		});
-
-		expect(screen.getByText("none")).toBeInTheDocument();
 		expect(screen.getByTestId("message-count")).toHaveTextContent("3");
-		expect(screen.getByTestId("history-server-count")).toHaveTextContent("0");
 	});
 
-	it("keeps only the latest thirty websocket messages", () => {
+	it("忽略损坏或非 batchUpdate 推送，同时保留上一次快照", async () => {
 		renderWebSocketProvider(<WebSocketProbe />);
-		const socket = FakeWebSocket.instances[0];
-
-		act(() => {
-			socket.open();
-			for (let index = 0; index < 31; index += 1) {
-				socket.message(websocketPayload(`message-${index}`));
-			}
-		});
-
-		expect(screen.getByText("message-30")).toBeInTheDocument();
-		expect(screen.getByTestId("message-count")).toHaveTextContent("30");
-	});
-
-	it("ignores malformed websocket messages without disconnecting", () => {
-		const consoleError = vi
-			.spyOn(console, "error")
-			.mockImplementation(() => undefined);
-		renderWebSocketProvider(<WebSocketProbe />);
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
 		const socket = FakeWebSocket.instances[0];
 
 		act(() => {
 			socket.open();
 			socket.message("not-json");
+			socket.message(JSON.stringify({ type: "hello" }));
 		});
 
-		expect(screen.getByText("connected")).toBeInTheDocument();
-		expect(screen.getByText("none")).toBeInTheDocument();
-		expect(screen.getByTestId("message-count")).toHaveTextContent("0");
-		expect(consoleError).toHaveBeenCalledWith(
-			"Failed to parse WebSocket message:",
-			expect.any(SyntaxError),
-		);
+		expect(screen.getByText("初始节点")).toBeInTheDocument();
+		expect(screen.getByTestId("message-count")).toHaveTextContent("1");
 	});
 
-	it("ignores websocket messages without a valid response shape", () => {
-		const consoleError = vi
-			.spyOn(console, "error")
-			.mockImplementation(() => undefined);
+	it("最多保留 60 个由 CFSM 增量合成的实时快照", async () => {
 		renderWebSocketProvider(<WebSocketProbe />);
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
 		const socket = FakeWebSocket.instances[0];
 
 		act(() => {
 			socket.open();
-			socket.message("null");
-			socket.message(JSON.stringify({ servers: [] }));
+			for (let index = 0; index < 61; index += 1) {
+				socket.message(websocketPayload(`message-${index}`));
+			}
 		});
 
-		expect(screen.getByTestId("message-count")).toHaveTextContent("0");
-		expect(consoleError).toHaveBeenCalledTimes(2);
-		expect(consoleError).toHaveBeenCalledWith(
-			"Failed to parse WebSocket message:",
-			expect.any(TypeError),
-		);
+		expect(screen.getByText("message-60")).toBeInTheDocument();
+		expect(screen.getByTestId("message-count")).toHaveTextContent("60");
 	});
 
 	it("exposes manual reconnect state separately from socket state", async () => {

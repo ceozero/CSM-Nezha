@@ -173,18 +173,18 @@ describe("MapTooltip", () => {
 });
 
 describe("ServerFlag", () => {
-	it("uses SVG flag classes when emoji flags are forced off", () => {
+	it("uses CFSM SVG flag resources when emoji flags are forced off", () => {
 		Object.assign(window, { ForceUseSvgFlag: true });
 		const { container } = render(<ServerFlag country_code="us" />);
 
-		expect(container.querySelector(".fi-us")).toBeInTheDocument();
+		expect(container.querySelector('img[src="/flags/us.svg"]')).toBeInTheDocument();
 	});
 
-	it("normalizes SVG flag classes and ignores invalid country codes", () => {
+	it("normalizes SVG flag resource paths and ignores invalid country codes", () => {
 		Object.assign(window, { ForceUseSvgFlag: true });
 		const { container, rerender } = render(<ServerFlag country_code="US" />);
 
-		expect(container.querySelector(".fi-us")).toBeInTheDocument();
+		expect(container.querySelector('img[src="/flags/us.svg"]')).toBeInTheDocument();
 
 		rerender(<ServerFlag country_code="u" />);
 
@@ -220,7 +220,7 @@ describe("ServerFlag", () => {
 		await waitFor(() => {
 			expect(container).toHaveTextContent("🇺🇸");
 		});
-		expect(container.querySelector(".fi-US")).not.toBeInTheDocument();
+		expect(container.querySelector("img")).not.toBeInTheDocument();
 	});
 
 	it("renders nothing for missing country codes", () => {

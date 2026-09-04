@@ -68,7 +68,7 @@ export default function ServerDetailOverview({
 		return <ServerDetailLoading />;
 	}
 
-	const server = nezhaWsData.servers.find((s) => s.id === Number(server_id));
+	const server = nezhaWsData.servers.find((s) => s.id === server_id);
 
 	if (!server) {
 		return <ServerDetailLoading />;

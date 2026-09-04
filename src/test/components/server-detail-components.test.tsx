@@ -43,7 +43,7 @@ describe("ServerDetailSummary", () => {
 	it("renders nothing until websocket data exists", () => {
 		websocketMocks.connected = false;
 
-		const { container } = render(<ServerDetailSummary server_id={1} />);
+		const { container } = render(<ServerDetailSummary server_id="1" />);
 
 		expect(container).toBeEmptyDOMElement();
 	});
@@ -51,7 +51,7 @@ describe("ServerDetailSummary", () => {
 	it("renders resource, network, and connection summaries for the selected server", () => {
 		seedWebSocketData();
 
-		render(<ServerDetailSummary server_id={1} />);
+		render(<ServerDetailSummary server_id="1" />);
 
 		expect(screen.getByText("12.00%")).toBeInTheDocument();
 		expect(screen.getAllByText("25.00%")).toHaveLength(2);
@@ -98,7 +98,7 @@ describe("ServerDetailOverview", () => {
 		sessionStorage.setItem("fromMainPage", "true");
 		seedWebSocketData({
 			server: createServer({
-				id: 7,
+				id: "7",
 				name: "edge-detail",
 				country_code: "us",
 				host: {

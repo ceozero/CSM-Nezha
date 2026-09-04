@@ -77,7 +77,7 @@ const monitorData: NezhaMonitor[] = [
 		monitor_id: 2,
 		monitor_name: "Beta",
 		display_index: 1,
-		server_id: 7,
+		server_id: "7",
 		server_name: "edge-chart",
 		created_at: times,
 		avg_delay: [15, 18, 0, 45, 48, 52, 4000, 65, 70, 75, 80, 85],
@@ -86,7 +86,7 @@ const monitorData: NezhaMonitor[] = [
 		monitor_id: 1,
 		monitor_name: "Alpha",
 		display_index: 3,
-		server_id: 7,
+		server_id: "7",
 		server_name: "edge-chart",
 		created_at: times,
 		avg_delay: [30, 32, 35, 36, 38, 40, 42, 44, 46, 48, 50, 52],
@@ -157,7 +157,7 @@ describe("NetworkChart", () => {
 		apiMocks.fetchMonitor.mockReturnValue(new Promise(() => undefined));
 
 		const { container } = renderWithQuery(
-			<NetworkChart server_id={7} show={false} />,
+			<NetworkChart server_id="7" show={false} />,
 		);
 
 		expect(container.querySelector(".h-\\[250px\\]")).toBeInTheDocument();
@@ -170,7 +170,7 @@ describe("NetworkChart", () => {
 			data: null,
 		});
 
-		renderWithQuery(<NetworkChart server_id={7} show={true} />);
+		renderWithQuery(<NetworkChart server_id="7" show={true} />);
 
 		expect(await screen.findByText("monitor.noData")).toBeInTheDocument();
 	});
@@ -187,10 +187,10 @@ describe("NetworkChart", () => {
 			data: monitorData,
 		});
 
-		renderWithQuery(<NetworkChart server_id={7} show={true} />);
+		renderWithQuery(<NetworkChart server_id="7" show={true} />);
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
-		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith(7, "1d");
+		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d");
 		expect(screen.getByText("2 monitor.monitorCount")).toBeInTheDocument();
 		expect(screen.getByText("Alpha")).toBeInTheDocument();
 		expect(screen.getByText("Beta")).toBeInTheDocument();
@@ -202,7 +202,7 @@ describe("NetworkChart", () => {
 		await user.click(screen.getByText("monitor.period7d"));
 
 		await waitFor(() => {
-			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith(7, "7d");
+			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "7d");
 		});
 	});
 });
