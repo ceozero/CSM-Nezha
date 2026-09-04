@@ -82,6 +82,28 @@ describe("date and billing helpers", () => {
 		expect(result.remainingPercentage).toBeCloseTo(16 / 30);
 	});
 
+	it("calculates non-renewing plan progress from the configured billing cycle", () => {
+		const yearly = getDaysBetweenDatesWithAutoRenewal({
+			startDate: "",
+			endDate: "2026-01-10T00:00:00.000Z",
+			autoRenewal: "0",
+			cycle: "year",
+			amount: "100",
+		});
+		expect(yearly.days).toBe(360);
+		expect(yearly.remainingPercentage).toBe(1);
+
+		const quarterly = getDaysBetweenDatesWithAutoRenewal({
+			startDate: "",
+			endDate: "2025-03-01T00:00:00.000Z",
+			autoRenewal: "0",
+			cycle: "quarterly",
+			amount: "100",
+		});
+		expect(quarterly.days).toBe(45);
+		expect(quarterly.remainingPercentage).toBeCloseTo(0.5);
+	});
+
 	it("handles auto-renewal before and after the current cycle end", () => {
 		expect(
 			getDaysBetweenDatesWithAutoRenewal({

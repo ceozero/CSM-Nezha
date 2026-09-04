@@ -55,7 +55,6 @@ export function formatNezhaInfo(now: number, serverInfo: NezhaServer) {
 export function getDaysBetweenDatesWithAutoRenewal({
 	autoRenewal,
 	cycle,
-	startDate,
 	endDate,
 }: BillingData): {
 	days: number;
@@ -105,44 +104,35 @@ export function getDaysBetweenDatesWithAutoRenewal({
 
 	const nowTime = Date.now();
 	const endTime = dayjs(endDate).valueOf();
+	const cycleDays = 30 * months;
+	const remainingPercentage = (days: number) =>
+		Math.min(1, Math.max(0, days / cycleDays));
 
 	if (autoRenewal !== "1") {
+		const days = getDaysBetweenDates(endDate, new Date(nowTime).toISOString());
 		return {
-			days: getDaysBetweenDates(endDate, new Date(nowTime).toISOString()),
+			days,
 			cycleLabel: cycleLabel,
-			remainingPercentage:
-				getDaysBetweenDates(endDate, new Date(nowTime).toISOString()) /
-					dayjs(endDate).diff(startDate, "day") >
-				1
-					? 1
-					: getDaysBetweenDates(endDate, new Date(nowTime).toISOString()) /
-						dayjs(endDate).diff(startDate, "day"),
+			// CFSM 未提供套餐开始日，统一按计费周期计算剩余比例。
+			remainingPercentage: remainingPercentage(days),
 		};
 	}
 
 	if (nowTime < endTime) {
+		const days = getDaysBetweenDates(endDate, new Date(nowTime).toISOString());
 		return {
-			days: getDaysBetweenDates(endDate, new Date(nowTime).toISOString()),
+			days,
 			cycleLabel: cycleLabel,
-			remainingPercentage:
-				getDaysBetweenDates(endDate, new Date(nowTime).toISOString()) /
-					(30 * months) >
-				1
-					? 1
-					: getDaysBetweenDates(endDate, new Date(nowTime).toISOString()) /
-						(30 * months),
+			remainingPercentage: remainingPercentage(days),
 		};
 	}
 
 	const nextTime = getNextCycleTime(endTime, months, nowTime);
 	const diff = dayjs(nextTime).diff(dayjs(), "day") + 1;
-	const remainingPercentage =
-		diff / (30 * months) > 1 ? 1 : diff / (30 * months);
-
 	return {
 		days: diff,
 		cycleLabel: cycleLabel,
-		remainingPercentage: remainingPercentage,
+		remainingPercentage: remainingPercentage(diff),
 	};
 }
 
