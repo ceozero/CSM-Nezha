@@ -3,6 +3,7 @@ import {
 	ArrowsUpDownIcon,
 	ArrowUpIcon,
 	ChartBarSquareIcon,
+	ChevronDownIcon,
 	MapIcon,
 	ServerStackIcon,
 	ViewColumnsIcon,
@@ -549,13 +550,7 @@ export default function Servers({
 						</span>
 					</button>
 					<span className="text-stone-300 dark:text-stone-600 mb-0.5">|</span>
-					<span className="relative ml-2 mr-3.25 inline-flex items-center">
-						<span
-							className="pointer-events-none select-none opacity-0 text-sm font-medium whitespace-nowrap"
-							aria-hidden
-						>
-							{t(`sort.types.${sortType.replace(/ /g, "_")}`)}
-						</span>
+					<span className="relative ml-2 mr-2 flex h-full min-w-17 items-center rounded-full focus-within:ring-1 focus-within:ring-blue-500/60">
 						<select
 							aria-label="Sort metric"
 							value={sortType}
@@ -564,14 +559,22 @@ export default function Servers({
 								setSortType(val);
 								if (val === "default") setSortOrder("desc");
 							}}
-							className="absolute inset-0 cursor-pointer appearance-none bg-transparent text-sm font-medium outline-none"
+							className="h-full w-full cursor-pointer appearance-none bg-transparent py-0 pr-5 text-sm font-medium text-current outline-none"
 						>
 							{SORT_TYPES.map((type) => (
-								<option key={type} value={type}>
+								<option
+									key={type}
+									value={type}
+									className="bg-white text-stone-900 dark:bg-stone-900 dark:text-stone-100"
+								>
 									{t(`sort.types.${type.replace(/ /g, "_")}`)}
 								</option>
 							))}
 						</select>
+						<ChevronDownIcon
+							aria-hidden
+							className="pointer-events-none absolute right-0 size-3.5 text-current"
+						/>
 					</span>
 				</div>
 			</div>
