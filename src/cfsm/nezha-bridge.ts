@@ -20,6 +20,18 @@ function megabytesToBytes(value: unknown) {
 	return numberValue(value) * MEBIBYTE;
 }
 
+function toNetworkProbe(delay: unknown, loss: unknown) {
+	if (typeof delay !== "number" || !Number.isFinite(delay) || delay < 0) {
+		return undefined;
+	}
+
+	const lossValue = typeof loss === "number" ? loss : Number.NaN;
+	return {
+		delay,
+		...(Number.isFinite(lossValue) && lossValue >= 0 ? { loss: lossValue } : {}),
+	};
+}
+
 /** CFSM 套餐流量以 GB 数值保存；原主题徽标需要可读的套餐文案。 */
 function formatTrafficLimit(value: unknown) {
 	const trafficLimit = String(value ?? "").trim();
@@ -135,6 +147,11 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 			tcp_conn_count: numberValue(server.tcp_conn),
 			udp_conn_count: numberValue(server.udp_conn),
 			process_count: numberValue(server.processes),
+			network_latency: {
+				ct: toNetworkProbe(server.ping_ct, server.loss_ct),
+				cu: toNetworkProbe(server.ping_cu, server.loss_cu),
+				cm: toNetworkProbe(server.ping_cm, server.loss_cm),
+			},
 			temperatures: [],
 			gpu: [],
 		},

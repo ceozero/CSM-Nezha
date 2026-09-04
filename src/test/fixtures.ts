@@ -34,6 +34,7 @@ const baseState: NezhaServer["state"] = {
 	tcp_conn_count: 8,
 	udp_conn_count: 4,
 	process_count: 88,
+	network_latency: {},
 	temperatures: [],
 	gpu: [],
 };

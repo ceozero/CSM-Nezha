@@ -139,6 +139,9 @@ function WebSocketProbe() {
 		<div>
 			<p>{connected ? "connected" : "disconnected"}</p>
 			<p>{lastData?.servers[0]?.name ?? "none"}</p>
+			<p data-testid="latest-ct-latency">
+				{lastData?.servers[0]?.state.network_latency.ct?.delay ?? "none"}
+			</p>
 			<p data-testid="message-count">{messageHistory.length}</p>
 			<p data-testid="history-server-count">
 				{messageHistory.reduce((total, item) => total + item.servers.length, 0)}
@@ -264,12 +267,12 @@ describe("WebSocketProvider", () => {
 		return render(<WebSocketProvider>{children}</WebSocketProvider>);
 	}
 
-	function websocketPayload(serverName: string) {
+	function websocketPayload(serverName: string, pingCt?: number) {
 		return JSON.stringify({
 			type: "batchUpdate",
 			updates: [{
 				serverId: "node-1",
-				samples: [{ ts: Date.parse("2025-01-01T00:00:20.000Z"), data: { name: serverName, cpu: 50 } }],
+				samples: [{ ts: Date.parse("2025-01-01T00:00:20.000Z"), data: { name: serverName, cpu: 50, ...(pingCt === undefined ? {} : { ping_ct: pingCt, loss_ct: 0 }) } }],
 			}],
 		});
 	}
@@ -293,6 +296,19 @@ describe("WebSocketProvider", () => {
 
 		expect(screen.getByText("second")).toBeInTheDocument();
 		expect(screen.getByTestId("message-count")).toHaveTextContent("3");
+	});
+
+	it("merges latest three-network values from CFSM WebSocket updates", async () => {
+		renderWebSocketProvider(<WebSocketProbe />);
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+		const socket = FakeWebSocket.instances[0];
+
+		act(() => {
+			socket.open();
+			socket.message(websocketPayload("latency-update", 184));
+		});
+
+		expect(screen.getByTestId("latest-ct-latency")).toHaveTextContent("184");
 	});
 
 	it("忽略损坏或非 batchUpdate 推送，同时保留上一次快照", async () => {

@@ -54,12 +54,7 @@ export interface CfsmServer {
 	/** 仅在后台开启三网详情时由 /api/servers 返回。 */
 	ping?: CfsmLatencyPoint[];
 	loss?: CfsmLatencyPoint[];
-	[key: string]: unknown;
-}
-
-export interface HistoryRow extends Partial<CfsmServer> {
-	timestamp: number;
-	/** 历史接口返回的四线路延迟与丢包数据。false 表示该线路未启用。 */
+	/** 当前采样的三网/百度延迟与丢包；false 表示该线路未启用。 */
 	ping_ct?: number | false;
 	ping_cu?: number | false;
 	ping_cm?: number | false;
@@ -68,6 +63,12 @@ export interface HistoryRow extends Partial<CfsmServer> {
 	loss_cu?: number | false;
 	loss_cm?: number | false;
 	loss_bd?: number | false;
+	[key: string]: unknown;
+}
+
+export interface HistoryRow extends Partial<CfsmServer> {
+	timestamp: number;
+	/** 历史接口返回的四线路延迟与丢包数据。false 表示该线路未启用。 */
 	disk_read_bps?: number;
 	disk_write_bps?: number;
 	disk_read_iops?: number;

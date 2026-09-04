@@ -2,6 +2,7 @@ import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
+import ServerNetworkLatency from "@/components/ServerNetworkLatency";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { formatBytes } from "@/lib/format";
 import {
@@ -193,6 +194,7 @@ function ServerCardInline({
 							</div>
 						</div>
 					</section>
+					<ServerNetworkLatency latency={serverInfo.state.network_latency} />
 					{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
 				</div>
 			</Card>

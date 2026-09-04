@@ -42,4 +42,25 @@ describe("toNezhaServer", () => {
 			parsePublicNote(smallerPlan.public_note)?.planDataMod?.trafficVol,
 		).toBe("500GB/月");
 	});
+
+	it("maps the latest CFSM three-network samples and hides disabled routes", () => {
+		const server = toNezhaServer({
+			id: "edge-latency",
+			name: "edge-latency",
+			ping_ct: 125,
+			ping_cu: 127,
+			ping_cm: 84,
+			ping_bd: false,
+			loss_ct: 16,
+			loss_cu: 0,
+			loss_cm: 0,
+			loss_bd: false,
+		});
+
+		expect(server.state.network_latency).toEqual({
+			ct: { delay: 125, loss: 16 },
+			cu: { delay: 127, loss: 0 },
+			cm: { delay: 84, loss: 0 },
+		});
+	});
 });

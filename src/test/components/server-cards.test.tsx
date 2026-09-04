@@ -122,6 +122,29 @@ describe("ServerCard", () => {
 		expect(screen.getByText("/server/7")).toBeInTheDocument();
 	});
 
+	it("shows the newest available three-network latency without fabricating disabled routes", () => {
+		const server = createServer({
+			name: "edge-latency",
+			state: {
+				network_latency: {
+					ct: { delay: 125, loss: 16 },
+					cu: { delay: 127, loss: 0 },
+					cm: { delay: 84, loss: 0 },
+				},
+			},
+		});
+
+		renderWithProviders(
+			<ServerCard now={Date.parse("2025-01-01T00:00:20.000Z")} serverInfo={server} />,
+		);
+
+		const latency = screen.getByLabelText("最新三网延迟");
+		expect(latency).toHaveTextContent("电信125ms丢 16%");
+		expect(latency).toHaveTextContent("联通127ms");
+		expect(latency).toHaveTextContent("移动84ms");
+		expect(latency).not.toHaveTextContent("百度");
+	});
+
 	it("renders a compact offline card without live metric blocks", () => {
 		const server = createServer({
 			id: 8,

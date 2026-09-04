@@ -44,8 +44,21 @@ export interface NezhaServerStatus {
 	tcp_conn_count: number;
 	udp_conn_count: number;
 	process_count: number;
+	/** CFSM 当前三网延迟；仅映射已启用且有有效采样的线路。 */
+	network_latency: NezhaNetworkLatency;
 	temperatures: temperature[];
 	gpu: number[];
+}
+
+export interface NezhaNetworkProbe {
+	delay: number;
+	loss?: number;
+}
+
+export interface NezhaNetworkLatency {
+	ct?: NezhaNetworkProbe;
+	cu?: NezhaNetworkProbe;
+	cm?: NezhaNetworkProbe;
 }
 
 interface temperature {
