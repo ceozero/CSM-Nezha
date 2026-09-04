@@ -20,6 +20,8 @@ export default function BillingInfo({
 	const amount = parsedData.billingDataMod.amount.trim();
 	const isFree = amount !== "" && Number(amount) === 0;
 	const isUsageBased = amount === "-1";
+	// CFSM 的价格字段不携带货币信息，主题默认按美元展示。
+	const displayAmount = amount.startsWith("$") ? amount : `$${amount}`;
 	const hasExpiryDate = Boolean(parsedData.billingDataMod.endDate);
 	// 免费套餐未配置到期日时视为永久；配置了到期日则仍显示实际剩余天数。
 	let isNeverExpire = isFree && !hasExpiryDate;
@@ -50,7 +52,7 @@ export default function BillingInfo({
 	const priceInfo =
 		amount && !isFree && !isUsageBased ? (
 			<p className={cn("text-[10px] text-muted-foreground ")}>
-				{t("billingInfo.price")}: {amount}/{parsedData.billingDataMod.cycle}
+				{t("billingInfo.price")}: {displayAmount}/{parsedData.billingDataMod.cycle}
 			</p>
 		) : isFree ? (
 			<p className={cn("text-[10px] text-green-600 ")}>{t("billingInfo.free")}</p>
