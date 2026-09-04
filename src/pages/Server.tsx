@@ -31,6 +31,7 @@ type PreparedServer = {
 };
 
 const EMPTY_SERVER_LIST: NezhaServer[] = [];
+const HOME_AUXILIARY_DATA_STALE_MS = 5 * 60_000;
 
 const isServerOnline = (now: number, server: NezhaServer) => {
 	const lastActiveTime = server.last_active.startsWith("000")
@@ -103,14 +104,16 @@ export default function Servers({
 	const { data: groupData, error: groupError } = useQuery({
 		queryKey: ["server-group"],
 		queryFn: () => fetchServerGroup(),
+		// 路由往返时复用缓存，避免和常驻 WebSocket 重复请求服务器列表。
+		staleTime: HOME_AUXILIARY_DATA_STALE_MS,
+		refetchOnWindowFocus: false,
 		retry: false,
 	});
 	const { data: serviceData, error: serviceError } = useQuery({
 		queryKey: ["service"],
 		queryFn: () => fetchService(),
-		refetchOnMount: true,
-		refetchOnWindowFocus: true,
-		refetchInterval: 10000,
+		staleTime: HOME_AUXILIARY_DATA_STALE_MS,
+		refetchOnWindowFocus: false,
 		retry: false,
 	});
 	const hasServices =

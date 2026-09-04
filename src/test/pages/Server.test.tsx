@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SortProvider } from "@/context/sort-provider";
@@ -93,8 +94,13 @@ function renderServerPage(
 	websocketValue: Partial<WebSocketContextType>,
 	{
 		backendError = null,
+		queryClient,
 		withStatusControl = false,
-	}: { backendError?: Error | null; withStatusControl?: boolean } = {},
+	}: {
+		backendError?: Error | null;
+		queryClient?: QueryClient;
+		withStatusControl?: boolean;
+	} = {},
 ) {
 	const defaultWebsocketValue: WebSocketContextType = {
 		lastData: null,
@@ -116,6 +122,7 @@ function renderServerPage(
 				</WebSocketContext.Provider>
 			</StatusProvider>
 		</SortProvider>,
+		{ queryClient },
 	);
 }
 
@@ -128,6 +135,8 @@ function websocketPayload(servers: NezhaServer[]) {
 
 describe("Servers page", () => {
 	beforeEach(() => {
+		apiMocks.fetchServerGroup.mockReset();
+		apiMocks.fetchService.mockReset();
 		apiMocks.fetchServerGroup.mockResolvedValue({
 			success: true,
 			data: [
@@ -239,6 +248,28 @@ describe("Servers page", () => {
 			expect(apiMocks.fetchServerGroup).toHaveBeenCalled();
 			expect(apiMocks.fetchService).toHaveBeenCalled();
 		});
+	});
+
+	it("reuses home auxiliary data after a route-sized remount", async () => {
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { gcTime: 60_000, retry: false } },
+		});
+		const websocketValue = {
+			connected: true,
+			lastData: websocketPayload([createServer({ id: 1, name: "alpha" })]),
+		};
+		const first = renderServerPage(websocketValue, { queryClient });
+
+		await waitFor(() => {
+			expect(apiMocks.fetchServerGroup).toHaveBeenCalledTimes(1);
+			expect(apiMocks.fetchService).toHaveBeenCalledTimes(1);
+		});
+		first.unmount();
+		renderServerPage(websocketValue, { queryClient });
+
+		await waitFor(() => expect(screen.getByText("alpha")).toBeInTheDocument());
+		expect(apiMocks.fetchServerGroup).toHaveBeenCalledTimes(1);
+		expect(apiMocks.fetchService).toHaveBeenCalledTimes(1);
 	});
 
 	it("shows an empty state and hides controls when there are no servers", () => {

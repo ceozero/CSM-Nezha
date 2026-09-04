@@ -326,6 +326,27 @@ describe("WebSocketProvider", () => {
 		expect(screen.getByTestId("message-count")).toHaveTextContent("60");
 	});
 
+	it("短暂切回页面时只恢复 WebSocket，不重复拉取服务器列表", async () => {
+		renderWebSocketProvider(<WebSocketProbe />);
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+		const socket = FakeWebSocket.instances[0];
+
+		act(() => socket.open());
+		Object.defineProperty(document, "hidden", {
+			configurable: true,
+			value: true,
+		});
+		act(() => document.dispatchEvent(new Event("visibilitychange")));
+		Object.defineProperty(document, "hidden", {
+			configurable: true,
+			value: false,
+		});
+		act(() => document.dispatchEvent(new Event("visibilitychange")));
+
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(2));
+		expect(cfsmMocks.getServers).toHaveBeenCalledTimes(1);
+	});
+
 	it("exposes manual reconnect state separately from socket state", async () => {
 		const user = userEvent.setup();
 		renderWebSocketProvider(<WebSocketProbe />);

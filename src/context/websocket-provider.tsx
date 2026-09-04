@@ -14,6 +14,10 @@ interface WebSocketProviderProps {
 	children: React.ReactNode;
 }
 
+// 短暂切换标签页时，保留最近的快照并只恢复 WebSocket；
+// 停留较久后才重新请求完整列表，避免返回页面出现不必要的闪动。
+const BACKGROUND_REVALIDATE_MS = 30_000;
+
 function webSocketUrl() {
 	const url = new URL("/api/ws", window.location.origin);
 	url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -37,6 +41,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 	const generationRef = useRef(0);
 	const activeRef = useRef(true);
 	const timeoutMinutesRef = useRef(0);
+	const hiddenAtRef = useRef<number | null>(null);
 
 	const publish = useCallback((rawServers: CfsmServer[], now = Date.now()) => {
 		const snapshot: NezhaWebsocketResponse = {
@@ -152,10 +157,24 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 	useEffect(() => {
 		const onVisibility = () => {
 			if (document.hidden) {
+				hiddenAtRef.current = Date.now();
 				close();
 				return;
 			}
-			if (activeRef.current) void refresh().then(connect).catch(() => setConnected(false));
+
+			const hiddenAt = hiddenAtRef.current;
+			hiddenAtRef.current = null;
+			if (!activeRef.current) return;
+
+			if (
+				rawServersRef.current.length === 0 ||
+				(hiddenAt !== null && Date.now() - hiddenAt >= BACKGROUND_REVALIDATE_MS)
+			) {
+				void refresh().then(connect).catch(() => setConnected(false));
+				return;
+			}
+
+			connect();
 		};
 		document.addEventListener("visibilitychange", onVisibility);
 		return () => document.removeEventListener("visibilitychange", onVisibility);
