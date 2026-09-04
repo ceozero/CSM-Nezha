@@ -151,6 +151,7 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 				ct: toNetworkProbe(server.ping_ct, server.loss_ct),
 				cu: toNetworkProbe(server.ping_cu, server.loss_cu),
 				cm: toNetworkProbe(server.ping_cm, server.loss_cm),
+				bd: toNetworkProbe(server.ping_bd, server.loss_bd),
 			},
 			temperatures: [],
 			gpu: [],

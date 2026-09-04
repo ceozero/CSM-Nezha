@@ -5,6 +5,7 @@ const ROUTES = [
 	{ key: "ct", label: "电信" },
 	{ key: "cu", label: "联通" },
 	{ key: "cm", label: "移动" },
+	{ key: "bd", label: "BGP" },
 ] as const;
 
 function latencyTone(delay: number, loss?: number) {
@@ -13,7 +14,7 @@ function latencyTone(delay: number, loss?: number) {
 	return "text-emerald-600 dark:text-emerald-400";
 }
 
-/** 在首页卡片展示 CFSM 当前采样的三网延迟，不额外请求历史数据。 */
+/** 在首页卡片展示 CFSM 当前采样的线路延迟，不额外请求历史数据。 */
 export default function ServerNetworkLatency({
 	latency,
 	className,
@@ -30,7 +31,7 @@ export default function ServerNetworkLatency({
 
 	return (
 		<section
-			aria-label="最新三网延迟"
+			aria-label="最新线路延迟"
 			className={cn("flex w-full flex-wrap items-center gap-1.5", className)}
 		>
 			{routes.map((route) => (
@@ -42,7 +43,7 @@ export default function ServerNetworkLatency({
 					<span className={cn("font-semibold tabular-nums", latencyTone(route.delay, route.loss))}>
 						{Math.round(route.delay)}ms
 					</span>
-					{route.loss !== undefined && route.loss > 0 && (
+					{route.loss !== undefined && (
 						<span className="font-medium text-rose-500 dark:text-rose-400">
 							丢 {Math.round(route.loss)}%
 						</span>

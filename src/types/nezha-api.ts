@@ -59,6 +59,8 @@ export interface NezhaNetworkLatency {
 	ct?: NezhaNetworkProbe;
 	cu?: NezhaNetworkProbe;
 	cm?: NezhaNetworkProbe;
+	/** CFSM 的第四探测线路；主题中按用户习惯显示为 BGP。 */
+	bd?: NezhaNetworkProbe;
 }
 
 interface temperature {
