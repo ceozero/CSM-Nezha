@@ -58,8 +58,8 @@ describe("ServerCard", () => {
 		);
 
 		expect(screen.getByText("serverCard.system")).toBeInTheDocument();
-		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
-		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
+		expect(screen.getAllByText("↑ 2.00 GiB")).toHaveLength(2);
+		expect(screen.getAllByText("↓ 1.00 GiB")).toHaveLength(2);
 	});
 
 	it("allows a theme author to explicitly use the compact layout", () => {
@@ -102,8 +102,8 @@ describe("ServerCard", () => {
 		expect(screen.getByText("Windows")).toBeInTheDocument();
 		expect(screen.getByText("12.00%")).toBeInTheDocument();
 		expect(screen.getAllByText("25.00%")).toHaveLength(2);
-		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
-		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
+		expect(screen.getAllByText("↑ 2.00 GiB")).toHaveLength(2);
+		expect(screen.getAllByText("↓ 1.00 GiB")).toHaveLength(2);
 		expect(screen.getByText("1Gbps")).toBeInTheDocument();
 		expect(
 			screen.getAllByText(/billingInfo.remaining: 16/).length,
@@ -164,8 +164,31 @@ describe("ServerCard", () => {
 		const monthlyTraffic = screen.getByLabelText("serverCard.monthlyTraffic");
 		expect(monthlyTraffic).toHaveTextContent("5.00 GiB / 10.00 GiB");
 		expect(monthlyTraffic).toHaveTextContent("50.0%");
+		expect(screen.getByText("serverCard.total")).toBeInTheDocument();
 		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
+	});
+
+	it("keeps monthly upload and download visible when no quota is configured", () => {
+		const server = createServer({
+			name: "edge-unlimited-monthly-traffic",
+			state: {
+				net_in_monthly_transfer: 3 * 1024 ** 3,
+				net_out_monthly_transfer: 2 * 1024 ** 3,
+				traffic_limit: 0,
+			},
+		});
+
+		renderWithProviders(
+			<ServerCard now={Date.parse("2025-01-01T00:00:20.000Z")} serverInfo={server} />,
+		);
+
+		const monthlyTraffic = screen.getByLabelText("serverCard.monthlyTraffic");
+		expect(monthlyTraffic).toHaveTextContent("↑ 2.00 GiB");
+		expect(monthlyTraffic).toHaveTextContent("↓ 3.00 GiB");
+		expect(
+			screen.queryByLabelText("serverCard.monthlyTrafficProgress"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders a compact offline card without live metric blocks", () => {

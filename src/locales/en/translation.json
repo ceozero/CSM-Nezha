@@ -39,9 +39,10 @@
 		"uptime": "Uptime",
 		"totalUpload": "Upload",
 		"totalDownload": "Download",
-		"monthlyTraffic": "Monthly Traffic",
+		"monthlyTraffic": "Month",
 		"monthlyTrafficProgress": "Monthly traffic usage",
-		"totalTraffic": "Total Traffic"
+		"totalTraffic": "Total Traffic",
+		"total": "Total"
 	},
 	"cycleTransfer": {
 		"used": "used",

@@ -36,11 +36,10 @@ export default function ServerTrafficUsage({
 	calcType: TrafficCalcType;
 }) {
 	const { t } = useTranslation();
-	if (limitGiB <= 0) return null;
-
+	const hasLimit = limitGiB > 0;
 	const used = monthlyTrafficUsage(down, up, calcType);
 	const limit = limitGiB * GIBIBYTE;
-	const percent = (used / limit) * 100;
+	const percent = hasLimit ? (used / limit) * 100 : 0;
 	const displayedPercent = Math.min(100, Math.max(0, percent));
 
 	return (
@@ -51,18 +50,31 @@ export default function ServerTrafficUsage({
 			<span className="shrink-0 text-muted-foreground">
 				{t("serverCard.monthlyTraffic")}
 			</span>
-			<span className="shrink-0 font-semibold tabular-nums">
-				{formatBytes(used)} / {formatBytes(limit)}
-			</span>
-			<Progress
-				aria-label={t("serverCard.monthlyTrafficProgress")}
-				className="h-1 min-w-6 flex-1"
-				indicatorClassName={usageTone(percent)}
-				value={displayedPercent}
-			/>
-			<span className="shrink-0 font-medium tabular-nums">
-				{percent.toFixed(1)}%
-			</span>
+			{hasLimit ? (
+				<>
+					<span className="shrink-0 font-semibold tabular-nums">
+						{formatBytes(used)} / {formatBytes(limit)}
+					</span>
+					<Progress
+						aria-label={t("serverCard.monthlyTrafficProgress")}
+						className="h-1 min-w-6 flex-1"
+						indicatorClassName={usageTone(percent)}
+						value={displayedPercent}
+					/>
+					<span className="shrink-0 font-medium tabular-nums">
+						{percent.toFixed(1)}%
+					</span>
+				</>
+			) : (
+				<>
+					<span className="text-sky-600 dark:text-sky-400">
+						↑ {formatBytes(up)}
+					</span>
+					<span className="text-violet-600 dark:text-violet-400">
+						↓ {formatBytes(down)}
+					</span>
+				</>
+			)}
 		</section>
 	);
 }

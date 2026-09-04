@@ -39,9 +39,10 @@
 		"uptime": "运行时间",
 		"totalUpload": "总上传",
 		"totalDownload": "总下载",
-		"monthlyTraffic": "本月流量",
+		"monthlyTraffic": "月",
 		"monthlyTrafficProgress": "本月流量进度",
-		"totalTraffic": "总流量"
+		"totalTraffic": "总流量",
+		"total": "总"
 	},
 	"cycleTransfer": {
 		"used": "已使用",
