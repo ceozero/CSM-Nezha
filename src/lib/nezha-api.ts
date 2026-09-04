@@ -75,7 +75,8 @@ const LATENCY_ROUTES = [
 	["ct", "电信"],
 	["cu", "联通"],
 	["cm", "移动"],
-	["bd", "百度"],
+	// CFSM 的第四条探测线路字段固定为 bd；主题按当前站点约定展示为 BGP。
+	["bd", "BGP"],
 ] as const;
 
 function numberAt(point: object | undefined, key: string) {

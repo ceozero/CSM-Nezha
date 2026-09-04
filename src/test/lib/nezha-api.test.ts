@@ -78,7 +78,7 @@ describe("Nezha 视图兼容 API", () => {
 		await expect(Promise.all([cpuRequest, memoryRequest])).resolves.toHaveLength(2);
 	});
 
-	it("将 CFSM 三网窗口桥接为原主题的网络图表数据", async () => {
+	it("将 CFSM 四线路窗口桥接为原主题的网络图表数据", async () => {
 		apiMocks.getServers.mockResolvedValue({
 			servers: [{
 				...server,
@@ -91,6 +91,7 @@ describe("Nezha 视图兼容 API", () => {
 		expect(monitor.data).toEqual(expect.arrayContaining([
 			expect.objectContaining({ monitor_name: "电信", server_id: "node-1", avg_delay: [21], packet_loss: [0] }),
 			expect.objectContaining({ monitor_name: "联通", avg_delay: [25], packet_loss: [1] }),
+			expect.objectContaining({ monitor_name: "BGP", avg_delay: [35], packet_loss: [2] }),
 		]));
 	});
 
