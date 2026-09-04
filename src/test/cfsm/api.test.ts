@@ -18,7 +18,7 @@ describe("CFSM HTTP 请求", () => {
 			}),
 		);
 		vi.stubGlobal("fetch", fetchMock);
-		localStorage.setItem("token", "admin-jwt");
+		localStorage.setItem("jwt_token", "admin-jwt");
 
 		await expect(getHistory("server-1", 168)).resolves.toEqual([]);
 

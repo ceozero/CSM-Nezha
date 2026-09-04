@@ -127,6 +127,7 @@ function renderWithQuery(ui: ReactElement) {
 
 describe("NetworkChart", () => {
 	beforeEach(() => {
+		localStorage.clear();
 		apiMocks.fetchMonitor.mockReset();
 	});
 
@@ -154,6 +155,7 @@ describe("NetworkChart", () => {
 
 	it("fetches realtime monitor data, transforms chart series, and allows all period changes", async () => {
 		const user = userEvent.setup();
+		localStorage.setItem("jwt_token", "admin-jwt");
 		apiMocks.fetchMonitor.mockResolvedValue({
 			success: true,
 			data: monitorData,
@@ -176,6 +178,32 @@ describe("NetworkChart", () => {
 		await waitFor(() => {
 			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "7d");
 		});
+	});
+
+	it("禁用未登录用户的 3 天和 7 天历史范围", async () => {
+		const user = userEvent.setup();
+		const onPeriodChange = vi.fn();
+
+		render(
+			<NetworkChartClient
+				chartDataKey={["Alpha", "Beta"]}
+				chartConfig={chartConfig}
+				chartData={clientChartData}
+				serverName="edge-client"
+				formattedData={clientFormattedData}
+				isPeriodLoading={false}
+				canAccessLongHistory={false}
+				period="1d"
+				onPeriodChange={onPeriodChange}
+			/>,
+		);
+
+		const sevenDays = screen.getByText("monitor.period7d");
+		expect(sevenDays.parentElement).toHaveAttribute("aria-disabled", "true");
+		expect(sevenDays.parentElement).toHaveAttribute("title", "monitor.loginRequired");
+
+		await user.click(sevenDays);
+		expect(onPeriodChange).not.toHaveBeenCalled();
 	});
 });
 

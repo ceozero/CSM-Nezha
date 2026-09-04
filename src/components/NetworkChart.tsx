@@ -28,6 +28,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { hasAdminToken } from "@/cfsm/api";
 import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import {
 	fetchMonitor,
@@ -197,6 +198,7 @@ export function NetworkChart({
 			serverName={monitorData.data[0].server_name}
 			formattedData={formattedData}
 			isPeriodLoading={isPlaceholderData}
+			canAccessLongHistory={hasAdminToken()}
 			period={period}
 			onPeriodChange={setPeriod}
 		/>
@@ -210,6 +212,7 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 	serverName,
 	formattedData,
 	isPeriodLoading,
+	canAccessLongHistory = true,
 	period,
 	onPeriodChange,
 }: {
@@ -219,6 +222,7 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 	serverName: string;
 	formattedData: ResultItem[];
 	isPeriodLoading: boolean;
+	canAccessLongHistory?: boolean;
 	period: MonitorPeriod;
 	onPeriodChange: (period: MonitorPeriod) => void;
 }) {
@@ -589,10 +593,14 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 							/>
 						)}
 						{TIME_RANGE_OPTIONS.map((option, index) => {
+							const requiresLogin =
+								option.value === "3d" || option.value === "7d";
+							const isDisabled = requiresLogin && !canAccessLongHistory;
 							return (
 								<div key={option.value}
 									ref={setItemRef(index)}
 									onClick={() => {
+										if (isDisabled) return;
 										if (period !== option.value) {
 											enableIndicatorAnimation();
 										}
@@ -600,10 +608,18 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 									}}
 									className={cn(
 										"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-										period === option.value
+										isDisabled
+											? "cursor-not-allowed text-muted-foreground/40 opacity-60"
+											: period === option.value
 											? "text-foreground"
 											: "text-muted-foreground hover:text-foreground",
 									)}
+									aria-disabled={isDisabled}
+									title={
+										isDisabled
+											? t("monitor.loginRequired", "请登录后查看")
+											: undefined
+									}
 								>
 									<span className="relative z-20">{option.label}</span>
 								</div>

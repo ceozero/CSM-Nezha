@@ -159,6 +159,7 @@ function seedWebSocketData() {
 
 describe("ServerDetailChart", () => {
 	beforeEach(() => {
+		localStorage.clear();
 		detailChartMocks.connected = true;
 		detailChartMocks.fetchServerMetrics.mockReset();
 		detailChartMocks.lastData = null;
@@ -178,6 +179,7 @@ describe("ServerDetailChart", () => {
 
 	it("renders realtime resource, network, connection, and GPU charts", async () => {
 		const user = userEvent.setup();
+		localStorage.setItem("jwt_token", "admin-jwt");
 		seedWebSocketData();
 
 		renderWithQuery(<ServerDetailChart server_id="7" />);
@@ -210,6 +212,22 @@ describe("ServerDetailChart", () => {
 				"7d",
 			);
 		});
+	});
+
+	it("未登录时将长历史范围置灰且不请求数据", async () => {
+		const user = userEvent.setup();
+		seedWebSocketData();
+
+		renderWithQuery(<ServerDetailChart server_id="7" />);
+
+		const sevenDays = await screen.findByText("serverDetailChart.period7d");
+		expect(sevenDays.parentElement).toHaveAttribute(
+			"aria-disabled",
+			"true",
+		);
+
+		await user.click(sevenDays);
+		expect(detailChartMocks.fetchServerMetrics).not.toHaveBeenCalled();
 	});
 
 	it("does not lock historical periods based on a frontend TSDB flag", async () => {

@@ -17,6 +17,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { hasAdminToken } from "@/cfsm/api";
 import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { formatBytes } from "@/lib/format";
@@ -132,21 +133,33 @@ function PeriodSelector({
 					/>
 				)}
 				{periods.map((period, index) => {
+					const requiresLogin =
+						period.value === "3d" || period.value === "7d";
+					const isDisabled = requiresLogin && !hasAdminToken();
 					return (
 						<div key={period.value}
-							ref={setItemRef(index)}
-							onClick={() => {
-								if (selectedPeriod !== period.value) {
+						ref={setItemRef(index)}
+						onClick={() => {
+							if (isDisabled) return;
+							if (selectedPeriod !== period.value) {
 									enableIndicatorAnimation();
 								}
 								onPeriodChange(period.value);
 							}}
-							className={cn(
-								"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-								selectedPeriod === period.value
-									? "text-foreground"
-									: "text-muted-foreground hover:text-foreground",
-							)}
+						className={cn(
+							"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
+							isDisabled
+								? "cursor-not-allowed text-muted-foreground/40 opacity-60"
+								: selectedPeriod === period.value
+								? "text-foreground"
+								: "text-muted-foreground hover:text-foreground",
+						)}
+						aria-disabled={isDisabled}
+						title={
+							isDisabled
+								? t("serverDetailChart.loginRequired", "请登录后查看")
+								: undefined
+						}
 						>
 							<div className="relative z-20 flex items-center gap-1.5">
 								{period.value === "realtime" && (

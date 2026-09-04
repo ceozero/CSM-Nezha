@@ -1,7 +1,7 @@
 import type { CfsmConfig, CfsmServer, HistoryRow, ServersResponse } from "./types";
 
 const TURNSTILE_STORAGE_KEY = "cfsm_turnstile_verified";
-const ADMIN_TOKEN_STORAGE_KEY = "token";
+const ADMIN_TOKEN_STORAGE_KEY = "jwt_token";
 
 export function getTurnstileCredential() {
 	return sessionStorage.getItem(TURNSTILE_STORAGE_KEY) || "";
@@ -11,7 +11,7 @@ export function setTurnstileCredential(value: string | null) {
 	if (value) sessionStorage.setItem(TURNSTILE_STORAGE_KEY, value);
 }
 
-function getAdminToken() {
+export function getAdminToken() {
 	try {
 		return localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || "";
 	} catch {
@@ -24,7 +24,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 	const headers = new Headers(init.headers);
 	const verified = getTurnstileCredential();
 	if (verified) headers.set("X-Turnstile-Verified", verified);
-	// CFSM 管理端登录后的 JWT 存在 localStorage.token。主题与站点同源时
+	// CFSM 管理端登录后的 JWT 存在 localStorage.jwt_token。主题与站点同源时
 	// 必须转发它，否则后端会拒绝超过 24 小时的历史查询。
 	const token = getAdminToken();
 	if (token && !headers.has("Authorization")) {
@@ -40,6 +40,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 		throw new Error(message);
 	}
 	return body as T;
+}
+
+/**
+ * 长历史仅向已登录管理员开放。后台登出时会删除 jwt_token，因此可作为
+ * 时间范围控件的即时登录态；真正的权限仍由后端的 JWT 校验兜底。
+ */
+export function hasAdminToken() {
+	return getAdminToken().length > 0;
 }
 
 export async function getConfig(turnstileToken?: string) {

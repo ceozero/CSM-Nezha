@@ -178,7 +178,7 @@ GET  /api/ws?subscribe=<all|server-id>
 
 主题 URL 模式不需要配置独立 `apiBase`，通常也不需要额外配置 CORS。
 
-管理员登录后，CFSM 会把 JWT 保存为 `localStorage.token`。主题的同源请求必须将它转发为 `Authorization: Bearer <token>`，否则后端会拒绝超过 24 小时的历史数据；不要用 `document.cookie` 判断登录状态，JWT 并不在 Cookie 中。
+管理员登录后，CFSM 会把 JWT 保存为 `localStorage.jwt_token`。主题的同源请求必须将它转发为 `Authorization: Bearer <token>`，否则后端会拒绝超过 24 小时的历史数据；不要用 `document.cookie` 判断登录状态，JWT 并不在 Cookie 中。未登录时，主题会把需要该权限的 3 天和 7 天选项置灰并禁止点击。
 
 `/api/config` 返回的 `theme_options` 是第三方主题的运行时配置。本主题第一版只读取它，不保存主题专属选项；如后续需要保存专属选项，只能使用公开的 `POST /api/theme_options`，不得调用 `save_settings` 等管理接口。站点级外观设置仍应跳转 CFSM 内置后台 `/admin#admin`。
 
@@ -300,7 +300,7 @@ function mergeServer(id: string, delta: Partial<CfsmServer>) {
 
 一个历史响应包含多个指标。前端应从同一份历史数组提取 CPU、内存、磁盘、网络、连接数等图表数据，而非为每个图表单独请求。
 
-本主题的时间范围固定为“实时、10 分、30 分、1 小时、6 小时、1 天、3 天、7 天”。其中 3 天会请求后端支持的 96 小时窗口后仅展示最近 72 小时；不要请求 `hours=72`，该参数不是 CFSM 的有效档位。主题不再依据浏览器 Cookie 锁定时间范围，实际是否可读取较长历史数据由 CFSM 后端的登录与权限策略决定。
+本主题的时间范围固定为“实时、10 分、30 分、1 小时、6 小时、1 天、3 天、7 天”。其中 3 天会请求后端支持的 96 小时窗口后仅展示最近 72 小时；不要请求 `hours=72`，该参数不是 CFSM 的有效档位。主题以 `localStorage.jwt_token` 判断登录态：未登录时 3 天和 7 天显示为灰色且不可点击，登录后可用；后端仍会对每次长历史请求校验 JWT。
 
 支持保留的第一版功能：
 
