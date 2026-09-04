@@ -58,7 +58,8 @@ describe("ServerCard", () => {
 		);
 
 		expect(screen.getByText("serverCard.system")).toBeInTheDocument();
-		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
 	});
 
 	it("allows a theme author to explicitly use the compact layout", () => {
@@ -76,7 +77,7 @@ describe("ServerCard", () => {
 		);
 
 		expect(screen.queryByText("serverCard.system")).not.toBeInTheDocument();
-		expect(screen.queryByText("serverCard.totalTraffic:3.00 GiB")).not.toBeInTheDocument();
+		expect(screen.queryByText("↑ 2.00 GiB")).not.toBeInTheDocument();
 	});
 
 	it("renders online server metrics, billing, plan data, and navigates on click", async () => {
@@ -101,7 +102,8 @@ describe("ServerCard", () => {
 		expect(screen.getByText("Windows")).toBeInTheDocument();
 		expect(screen.getByText("12.00%")).toBeInTheDocument();
 		expect(screen.getAllByText("25.00%")).toHaveLength(2);
-		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
 		expect(screen.getByText("1Gbps")).toBeInTheDocument();
 		expect(
 			screen.getAllByText(/billingInfo.remaining: 16/).length,
@@ -162,7 +164,8 @@ describe("ServerCard", () => {
 		const monthlyTraffic = screen.getByLabelText("serverCard.monthlyTraffic");
 		expect(monthlyTraffic).toHaveTextContent("5.00 GiB / 10.00 GiB");
 		expect(monthlyTraffic).toHaveTextContent("50.0%");
-		expect(screen.getByText("serverCard.totalTraffic:3.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↑ 2.00 GiB")).toBeInTheDocument();
+		expect(screen.getByText("↓ 1.00 GiB")).toBeInTheDocument();
 	});
 
 	it("renders a compact offline card without live metric blocks", () => {

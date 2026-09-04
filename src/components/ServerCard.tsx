@@ -211,11 +211,14 @@ function ServerCard({
 						/>
 						<Badge
 							variant="outline"
-							className="items-center flex-1 justify-center rounded-[8px] text-nowrap text-[11px] border-muted-50 shadow-md shadow-neutral-200/30 dark:shadow-none"
+							className="h-6 items-center flex-1 justify-center gap-2 rounded-[8px] text-nowrap text-[10px] border-muted-50 shadow-md shadow-neutral-200/30 dark:shadow-none"
 						>
-							{t("serverCard.totalTraffic")}:{formatBytes(
-								net_in_transfer + net_out_transfer,
-							)}
+							<span className="text-sky-600 dark:text-sky-400">
+								↑ {formatBytes(net_out_transfer)}
+							</span>
+							<span className="text-violet-600 dark:text-violet-400">
+								↓ {formatBytes(net_in_transfer)}
+							</span>
 						</Badge>
 					</section>
 				)}

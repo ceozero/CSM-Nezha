@@ -46,27 +46,23 @@ export default function ServerTrafficUsage({
 	return (
 		<section
 			aria-label={t("serverCard.monthlyTraffic")}
-			className="flex min-w-0 flex-[1.4] flex-col justify-center gap-1 rounded-[8px] border border-border/70 bg-muted/35 px-2 py-1.5 text-[10px]"
+			className="flex h-6 min-w-0 flex-[1.4] items-center gap-1.5 rounded-[8px] border border-border/70 bg-muted/35 px-2 text-[10px]"
 		>
-			<div className="flex items-center justify-between gap-2 tabular-nums">
-				<span className="shrink-0 text-muted-foreground">
-					{t("serverCard.monthlyTraffic")}
-				</span>
-				<span className="truncate font-semibold">
-					{formatBytes(used)} / {formatBytes(limit)}
-				</span>
-			</div>
-			<div className="flex items-center gap-1.5">
-				<Progress
-					aria-label={t("serverCard.monthlyTrafficProgress")}
-					className="h-1 flex-1"
-					indicatorClassName={usageTone(percent)}
-					value={displayedPercent}
-				/>
-				<span className="w-9 text-right font-medium tabular-nums">
-					{percent.toFixed(1)}%
-				</span>
-			</div>
+			<span className="shrink-0 text-muted-foreground">
+				{t("serverCard.monthlyTraffic")}
+			</span>
+			<span className="shrink-0 font-semibold tabular-nums">
+				{formatBytes(used)} / {formatBytes(limit)}
+			</span>
+			<Progress
+				aria-label={t("serverCard.monthlyTrafficProgress")}
+				className="h-1 min-w-6 flex-1"
+				indicatorClassName={usageTone(percent)}
+				value={displayedPercent}
+			/>
+			<span className="shrink-0 font-medium tabular-nums">
+				{percent.toFixed(1)}%
+			</span>
 		</section>
 	);
 }
