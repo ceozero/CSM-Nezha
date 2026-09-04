@@ -1,5 +1,4 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { DashCommand } from "./components/DashCommand";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -59,7 +58,6 @@ function NezhaDashShell() {
 }
 
 function Bootstrap() {
-	const { i18n } = useTranslation();
 	const { setTheme } = useTheme();
 	const [config, setConfig] = useState<CfsmConfig | null>(null);
 	const [error, setError] = useState("");
@@ -76,10 +74,7 @@ function Bootstrap() {
 	useEffect(() => {
 		if (!config) return;
 		document.title = config.site_title || "CF-Server-Monitor";
-		if (!localStorage.getItem("language") && config.default_language === "en") {
-			void i18n.changeLanguage("en-US");
-		}
-	}, [config, i18n]);
+	}, [config]);
 	useEffect(() => {
 		// 保留原主题的外观覆盖开关；CFSM 注入自定义脚本时仍可使用。
 		// @ts-expect-error ForceTheme 是可选的主题运行时全局变量。
