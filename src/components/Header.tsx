@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import defaultLogo from "../../public/apple-touch-icon.png?url";
 import { ModeToggle } from "@/components/ThemeSwitcher";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBackground } from "@/hooks/use-background";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
@@ -70,9 +69,6 @@ function Header() {
 
 	// @ts-expect-error CustomLogo is a global variable
 	const customLogo = window.CustomLogo || defaultLogo;
-
-	// @ts-expect-error CustomDesc is a global variable
-	const customDesc = window.CustomDesc as string | undefined;
 
 	const customMobileBackgroundImage =
 		window.CustomMobileBackgroundImage !== ""
@@ -138,17 +134,6 @@ function Header() {
 						<Skeleton className="h-6 w-20 rounded-[5px] bg-muted-foreground/10 animate-none" />
 					) : (
 						siteName || "NEZHA"
-					)}
-					{customDesc && (
-						<>
-							<Separator
-								orientation="vertical"
-								className="mx-2 hidden h-4 w-px md:block"
-							/>
-							<p className="hidden text-sm font-medium opacity-40 md:block">
-								{customDesc}
-							</p>
-						</>
 					)}
 				</section>
 				<section className="flex items-center gap-2 header-handles">
