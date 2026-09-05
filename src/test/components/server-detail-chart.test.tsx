@@ -10,6 +10,7 @@ import type { NezhaServer, NezhaWebsocketResponse } from "@/types/nezha-api";
 
 const detailChartMocks = vi.hoisted(() => ({
 	connected: true,
+	fetchDiskIoMetrics: vi.fn(),
 	fetchServerMetrics: vi.fn(),
 	lastData: null as NezhaWebsocketResponse | null,
 	messageHistory: [] as NezhaWebsocketResponse[],
@@ -74,6 +75,7 @@ vi.mock("@/hooks/use-websocket-context", () => ({
 }));
 
 vi.mock("@/lib/nezha-api", () => ({
+	fetchDiskIoMetrics: detailChartMocks.fetchDiskIoMetrics,
 	fetchServerMetrics: detailChartMocks.fetchServerMetrics,
 }));
 
@@ -162,11 +164,13 @@ describe("ServerDetailChart", () => {
 		localStorage.clear();
 		detailChartMocks.connected = true;
 		detailChartMocks.fetchServerMetrics.mockReset();
+		detailChartMocks.fetchDiskIoMetrics.mockReset();
 		detailChartMocks.lastData = null;
 		detailChartMocks.messageHistory = [];
 		detailChartMocks.fetchServerMetrics.mockImplementation(
 			(_serverId: string, metric: string) => Promise.resolve(metricsResponse(metric)),
 		);
+		detailChartMocks.fetchDiskIoMetrics.mockResolvedValue([]);
 	});
 
 	it("renders the loading grid without websocket data", () => {
@@ -263,6 +267,9 @@ describe("ServerDetailChart", () => {
 
 		for (const metric of [
 			"cpu",
+			"load1",
+			"load5",
+			"load15",
 			"gpu",
 			"memory",
 			"swap",

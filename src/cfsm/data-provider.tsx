@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 import { mergeServer, toDashboardServer, toRealtimePoint } from "./adapter";
-import { getServer, getServers } from "./api";
+import { getAdminToken, getServer, getServers } from "./api";
 import type { CfsmConfig, CfsmServer, DashboardServer, RealtimePoint } from "./types";
 
 type DataState = {
@@ -47,6 +47,8 @@ function buildWebSocketUrl(subscribe: string) {
 	const url = new URL("/api/ws", window.location.origin);
 	url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
 	url.searchParams.set("subscribe", subscribe);
+	const token = getAdminToken();
+	if (token) url.searchParams.set("token", token);
 	return url;
 }
 

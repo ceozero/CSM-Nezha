@@ -9,6 +9,7 @@ import type {
 	LoginUserResponse,
 	MetricPeriod,
 	MetricType,
+	DiskIoDataPoint,
 	MonitorResponse,
 	ServerGroupResponse,
 	ServerMetricsResponse,
@@ -199,4 +200,21 @@ export const fetchServerMetrics = async (
 			data_points: toMetricPoints(rows, metric),
 		},
 	};
+};
+
+/** 从同一份历史响应提取磁盘 I/O，避免为六个指标重复请求 D1。 */
+export const fetchDiskIoMetrics = async (
+	serverId: string,
+	period: MetricPeriod,
+): Promise<DiskIoDataPoint[]> => {
+	const rows = trimRowsForPeriod(await getSharedHistory(serverId, period), period);
+	return rows.map((row) => ({
+		ts: Number(row.timestamp),
+		readBps: Number(row.disk_read_bps) || 0,
+		writeBps: Number(row.disk_write_bps) || 0,
+		readIops: Number(row.disk_read_iops) || 0,
+		writeIops: Number(row.disk_write_iops) || 0,
+		awaitMs: Number(row.disk_await_ms) || 0,
+		util: Number(row.disk_util) || 0,
+	}));
 };

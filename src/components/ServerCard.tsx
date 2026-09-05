@@ -12,6 +12,7 @@ import {
 } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import type { NezhaServer } from "@/types/nezha-api";
 import BillingInfo from "./billingInfo";
 import PlanInfo from "./PlanInfo";
@@ -26,6 +27,7 @@ function ServerCard({
 	serverInfo: NezhaServer;
 }) {
 	const { t } = useTranslation();
+	const { siteDisplayConfig } = useWebSocketContext();
 	const navigate = useNavigate();
 	const {
 		name,
@@ -56,12 +58,16 @@ function ServerCard({
 
 	// CFSM 不会注入原主题的全局开关；未配置时应保持原主题的完整卡片。
 	// @ts-expect-error ShowNetTransfer is a global variable
-	const showNetTransfer = window.ShowNetTransfer !== false;
+	const showNetTransfer = window.ShowNetTransfer !== false && siteDisplayConfig.showTraffic;
 
 	// @ts-expect-error FixedTopServerName is a global variable
 	const fixedTopServerName = window.FixedTopServerName !== false;
 
 	const parsedData = parsePublicNote(public_note);
+	const billingProps = {
+		showPrice: siteDisplayConfig.showPrice,
+		showExpire: siteDisplayConfig.showExpire,
+	};
 
 	return online ? (
 		<Card
@@ -107,7 +113,7 @@ function ServerCard({
 						})}
 					>
 						{parsedData?.billingDataMod && (
-							<BillingInfo parsedData={parsedData} />
+							<BillingInfo parsedData={parsedData} {...billingProps} />
 						)}
 					</div>
 				</div>
@@ -117,7 +123,7 @@ function ServerCard({
 					"lg:flex": fixedTopServerName,
 				})}
 			>
-				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
+				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} {...billingProps} />}
 			</div>
 			<div className="flex flex-col lg:items-start items-center gap-2">
 				<section
@@ -200,7 +206,7 @@ function ServerCard({
 						</div>
 					</div>
 				</section>
-				<ServerNetworkLatency latency={serverInfo.state.network_latency} />
+				{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency latency={serverInfo.state.network_latency} />}
 				{showNetTransfer && (
 					<section className={"flex items-center w-full justify-between gap-1"}>
 						<ServerTrafficUsage
@@ -225,7 +231,7 @@ function ServerCard({
 						</Badge>
 					</section>
 				)}
-				{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+				{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
 			</div>
 		</Card>
 	) : (
@@ -275,7 +281,7 @@ function ServerCard({
 						})}
 					>
 						{parsedData?.billingDataMod && (
-							<BillingInfo parsedData={parsedData} />
+							<BillingInfo parsedData={parsedData} {...billingProps} />
 						)}
 					</div>
 				</div>
@@ -285,9 +291,9 @@ function ServerCard({
 					"lg:flex": fixedTopServerName,
 				})}
 			>
-				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
+				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} {...billingProps} />}
 			</div>
-			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
 		</Card>
 	);
 }

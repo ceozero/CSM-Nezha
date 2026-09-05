@@ -50,6 +50,15 @@ export interface NezhaServerStatus {
 	tcp_conn_count: number;
 	udp_conn_count: number;
 	process_count: number;
+	/** CFSM 实时磁盘 I/O 指标，旧探针未上报时各项为 0。 */
+	disk_io: {
+		read_bps: number;
+		write_bps: number;
+		read_iops: number;
+		write_iops: number;
+		await_ms: number;
+		util: number;
+	};
 	/** CFSM 当前三网延迟；仅映射已启用且有有效采样的线路。 */
 	network_latency: NezhaNetworkLatency;
 	temperatures: temperature[];
@@ -212,6 +221,16 @@ export type MetricPeriod = "10m" | "30m" | "1h" | "6h" | "1d" | "3d" | "7d";
 export interface MetricDataPoint {
 	ts: number;
 	value: number;
+}
+
+export interface DiskIoDataPoint {
+	ts: number;
+	readBps: number;
+	writeBps: number;
+	readIops: number;
+	writeIops: number;
+	awaitMs: number;
+	util: number;
 }
 
 export interface ServerMetricsData {

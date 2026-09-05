@@ -75,6 +75,21 @@ function parseGpuNames(value: CfsmServer["gpu_info"]) {
 	}
 }
 
+function parseGpuUsage(value: CfsmServer["gpu_info"]) {
+	const parsed = typeof value === "string" ? (() => {
+		try {
+			return JSON.parse(value) as unknown;
+		} catch {
+			return [] as unknown[];
+		}
+	})() : value;
+	if (!Array.isArray(parsed)) return [];
+	return parsed.map((gpu) => {
+		if (!gpu || typeof gpu !== "object") return 0;
+		return numberValue((gpu as { info?: unknown }).info);
+	});
+}
+
 /**
  * 保留原 nezha-dash-v2 组件树，同时把 CFSM 字段转换为其既有视图模型。
  * 容量字段在 CFSM 中是 MiB，而原主题的 formatBytes 以字节为单位显示。
@@ -169,7 +184,15 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 				bd: toNetworkProbe(server.ping_bd, server.loss_bd),
 			},
 			temperatures: [],
-			gpu: [],
+			gpu: parseGpuUsage(server.gpu_info),
+			disk_io: {
+				read_bps: numberValue(server.disk?.read_bps),
+				write_bps: numberValue(server.disk?.write_bps),
+				read_iops: numberValue(server.disk?.read_iops),
+				write_iops: numberValue(server.disk?.write_iops),
+				await_ms: numberValue(server.disk?.await_ms),
+				util: numberValue(server.disk?.util),
+			},
 		},
 	};
 }
@@ -203,7 +226,7 @@ const HISTORY_FIELDS: Record<MetricType, keyof HistoryRow | "memory"> = {
 	process_count: "processes",
 	temperature: "cpu",
 	uptime: "timestamp",
-	gpu: "cpu",
+	gpu: "gpu_info",
 };
 
 export function toMetricPoints(rows: HistoryRow[], metric: MetricType): MetricDataPoint[] {
@@ -215,6 +238,12 @@ export function toMetricPoints(rows: HistoryRow[], metric: MetricType): MetricDa
 		else if (metric === "load1" || metric === "load5" || metric === "load15") {
 			const index = metric === "load1" ? 0 : metric === "load5" ? 1 : 2;
 			value = Number(String(row.load_avg || "").split(/\s+/)[index]) || 0;
+		} else if (metric === "gpu") {
+			const values = parseGpuUsage(row.gpu_info);
+			// 多 GPU 主机以平均利用率绘制单张概览图，避免遗漏任意一张显卡。
+			value = values.length > 0
+				? values.reduce((sum, item) => sum + item, 0) / values.length
+				: 0;
 		} else if (field === "uptime") value = 0;
 		else value = numberValue(row[field]);
 		return { ts: numberValue(row.timestamp), value };

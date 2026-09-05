@@ -24,24 +24,6 @@ vi.mock("@/components/ServerDetailOverview", () => ({
 	),
 }));
 
-vi.mock("@/components/TabSwitch", () => ({
-	default: ({
-		tabs,
-		setCurrentTab,
-	}: {
-		tabs: string[];
-		setCurrentTab: (tab: string) => void;
-	}) => (
-		<div>
-			{tabs.map((tab) => (
-				<button key={tab} type="button" onClick={() => setCurrentTab(tab)}>
-					{tab}
-				</button>
-			))}
-		</div>
-	),
-}));
-
 function LocationProbe() {
 	const location = useLocation();
 	return <p>{location.pathname}</p>;
@@ -97,8 +79,7 @@ describe("ServerDetail", () => {
 		vi.stubGlobal("scrollTo", vi.fn());
 	});
 
-	it("renders detail tab by default and can switch to network tab", async () => {
-		const user = userEvent.setup();
+	it("在详情图表之后直接渲染网络监控，不再使用标签切换", async () => {
 		render(
 			<MemoryRouter initialEntries={["/server/7"]}>
 				<Routes>
@@ -109,13 +90,11 @@ describe("ServerDetail", () => {
 
 		expect(screen.getByTestId("detail-overview")).toHaveTextContent("7");
 		expect(screen.getByTestId("detail-chart")).toHaveTextContent("7");
-		expect(screen.queryByTestId("network-chart")).not.toBeInTheDocument();
-
-		await user.click(screen.getByRole("button", { name: "Network" }));
 		expect(await screen.findByTestId("network-chart")).toHaveTextContent(
 			"7:true",
 		);
-		expect(screen.queryByTestId("detail-chart")).not.toBeInTheDocument();
+		expect(screen.getByTestId("detail-chart")).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Network" })).not.toBeInTheDocument();
 	});
 
 	it("redirects when route params are missing", async () => {

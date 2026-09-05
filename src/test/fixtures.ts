@@ -41,6 +41,14 @@ const baseState: NezhaServer["state"] = {
 	network_latency: {},
 	temperatures: [],
 	gpu: [],
+	disk_io: {
+		read_bps: 0,
+		write_bps: 0,
+		read_iops: 0,
+		write_iops: 0,
+		await_ms: 0,
+		util: 0,
+	},
 };
 
 export function createServer(

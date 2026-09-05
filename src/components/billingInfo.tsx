@@ -9,8 +9,12 @@ import RemainPercentBar from "./RemainPercentBar";
 
 export default function BillingInfo({
 	parsedData,
+	showPrice = true,
+	showExpire = true,
 }: {
 	parsedData: PublicNoteData;
+	showPrice?: boolean;
+	showExpire?: boolean;
 }) {
 	const { t } = useTranslation();
 	if (!parsedData?.billingDataMod) {
@@ -50,8 +54,8 @@ export default function BillingInfo({
 		}
 	}
 
-	const priceInfo =
-		amount && !isFree && !isUsageBased ? (
+	const priceInfo = showPrice
+		? amount && !isFree && !isUsageBased ? (
 			<p className={cn("text-[10px] text-muted-foreground ")}>
 				{t("billingInfo.price")}: {displayAmount}/{parsedData.billingDataMod.cycle}
 			</p>
@@ -61,12 +65,13 @@ export default function BillingInfo({
 			<p className={cn("text-[10px] text-pink-600 ")}>
 				{t("billingInfo.usage-baseed")}
 			</p>
-		) : null;
+		) : null
+		: null;
 
 	return daysLeftObject.days >= 0 ? (
 		<>
 			{priceInfo}
-			{(hasExpiryDate || isFree) && (
+			{showExpire && (hasExpiryDate || isFree) && (
 				<div className={cn("text-[10px] text-muted-foreground")}>
 					{t("billingInfo.remaining")}:{" "}
 					{isNeverExpire
@@ -74,7 +79,7 @@ export default function BillingInfo({
 						: `${daysLeftObject.days} ${t("billingInfo.days")}`}
 				</div>
 			)}
-			{hasExpiryDate && !isNeverExpire && (
+			{showExpire && hasExpiryDate && !isNeverExpire && (
 				<RemainPercentBar
 					className="mt-0.5"
 					value={daysLeftObject.remainingPercentage * 100}
@@ -84,10 +89,10 @@ export default function BillingInfo({
 	) : (
 		<>
 			{priceInfo}
-			<p className={cn("text-[10px] text-muted-foreground text-red-600")}>
+			{showExpire && <p className={cn("text-[10px] text-muted-foreground text-red-600")}>
 				{t("billingInfo.expired")}: {daysLeftObject.days * -1}{" "}
 				{t("billingInfo.days")}
-			</p>
+			</p>}
 		</>
 	);
 }

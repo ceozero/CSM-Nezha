@@ -2,8 +2,10 @@ import { cn, type PublicNoteData } from "@/lib/utils";
 
 export default function PlanInfo({
 	parsedData,
+	showTraffic = true,
 }: {
 	parsedData: PublicNoteData;
+	showTraffic?: boolean;
 }) {
 	if (!parsedData?.planDataMod) {
 		return null;
@@ -30,7 +32,7 @@ export default function PlanInfo({
 					{parsedData.planDataMod.bandwidth}
 				</p>
 			)}
-			{parsedData.planDataMod.trafficVol !== "" && (
+			{showTraffic && parsedData.planDataMod.trafficVol !== "" && (
 				<p
 					className={cn(
 						"text-[9px] bg-green-600 text-green-200 dark:bg-green-800 dark:text-green-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",

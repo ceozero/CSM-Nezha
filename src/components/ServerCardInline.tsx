@@ -11,6 +11,7 @@ import {
 } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import type { NezhaServer } from "@/types/nezha-api";
 import BillingInfo from "./billingInfo";
 import PlanInfo from "./PlanInfo";
@@ -25,6 +26,7 @@ function ServerCardInline({
 	serverInfo: NezhaServer;
 }) {
 	const { t } = useTranslation();
+	const { siteDisplayConfig } = useWebSocketContext();
 	const navigate = useNavigate();
 	const {
 		name,
@@ -55,6 +57,10 @@ function ServerCardInline({
 			: undefined;
 
 	const parsedData = parsePublicNote(public_note);
+	const billingProps = {
+		showPrice: siteDisplayConfig.showPrice,
+		showExpire: siteDisplayConfig.showExpire,
+	};
 
 	return online ? (
 		<section>
@@ -90,7 +96,7 @@ function ServerCardInline({
 							{name}
 						</p>
 						{parsedData?.billingDataMod && (
-							<BillingInfo parsedData={parsedData} />
+							<BillingInfo parsedData={parsedData} {...billingProps} />
 						)}
 					</div>
 				</section>
@@ -194,8 +200,8 @@ function ServerCardInline({
 							</div>
 						</div>
 					</section>
-					<ServerNetworkLatency latency={serverInfo.state.network_latency} />
-					{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+					{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency latency={serverInfo.state.network_latency} />}
+					{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
 				</div>
 			</Card>
 		</section>
@@ -232,12 +238,12 @@ function ServerCardInline({
 						{name}
 					</p>
 					{parsedData?.billingDataMod && (
-						<BillingInfo parsedData={parsedData} />
+						<BillingInfo parsedData={parsedData} {...billingProps} />
 					)}
 				</div>
 			</section>
 			<Separator orientation="vertical" className="h-8 ml-3 lg:ml-1 mr-3" />
-			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} />}
+			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
 		</Card>
 	);
 }

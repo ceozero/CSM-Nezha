@@ -14,6 +14,7 @@ import { useTooltip } from "@/hooks/use-tooltip";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 
 const cfsmMocks = vi.hoisted(() => ({
+	getAdminToken: vi.fn(),
 	getConfig: vi.fn(),
 	getServers: vi.fn(),
 }));
@@ -133,6 +134,7 @@ function WebSocketProbe() {
 		messageHistory,
 		needReconnect,
 		setNeedReconnect,
+		siteDisplayConfig,
 	} = useWebSocketContext();
 
 	return (
@@ -143,6 +145,9 @@ function WebSocketProbe() {
 				{lastData?.servers[0]?.state.network_latency.ct?.delay ?? "none"}
 			</p>
 			<p data-testid="message-count">{messageHistory.length}</p>
+			<p data-testid="display-config">
+				{`${siteDisplayConfig.showPrice}:${siteDisplayConfig.showExpire}:${siteDisplayConfig.showTraffic}:${siteDisplayConfig.showThreeNetDetails}`}
+			</p>
 			<p data-testid="history-server-count">
 				{messageHistory.reduce((total, item) => total + item.servers.length, 0)}
 			</p>
@@ -250,7 +255,9 @@ describe("WebSocketProvider", () => {
 		FakeWebSocket.instances = [];
 		vi.stubGlobal("WebSocket", FakeWebSocket);
 		cfsmMocks.getConfig.mockReset();
+		cfsmMocks.getAdminToken.mockReset();
 		cfsmMocks.getServers.mockReset();
+		cfsmMocks.getAdminToken.mockReturnValue("");
 		cfsmMocks.getConfig.mockResolvedValue({ frontend_ws_timeout_minutes: 0 });
 		cfsmMocks.getServers.mockResolvedValue({
 			servers: [{
@@ -296,6 +303,37 @@ describe("WebSocketProvider", () => {
 
 		expect(screen.getByText("second")).toBeInTheDocument();
 		expect(screen.getByTestId("message-count")).toHaveTextContent("3");
+	});
+
+	it("将 JWT 带入私有站点 WebSocket，并应用后台显示开关", async () => {
+		cfsmMocks.getAdminToken.mockReturnValue("private-jwt");
+		cfsmMocks.getServers.mockResolvedValue({
+			servers: [{
+				id: "private-node",
+				name: "私有节点",
+				ram_total: 1024,
+				disk_total: 1024,
+				last_updated: Date.now(),
+			}],
+			sysConfig: {
+				show_price: "false",
+				show_expire: "0",
+				show_tf: false,
+				show_three_net_details: "1",
+			},
+		});
+
+		renderWebSocketProvider(<WebSocketProbe />);
+
+		await vi.waitFor(() =>
+			expect(screen.getByTestId("display-config")).toHaveTextContent(
+				"false:false:false:true",
+			),
+		);
+		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+		expect(FakeWebSocket.instances[0].url).toBe(
+			"wss://localhost/api/ws?subscribe=all&token=private-jwt",
+		);
 	});
 
 	it("merges latest three-network values from CFSM WebSocket updates", async () => {

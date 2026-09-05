@@ -21,7 +21,7 @@ import { hasAdminToken } from "@/cfsm/api";
 import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { formatBytes } from "@/lib/format";
-import { fetchServerMetrics } from "@/lib/nezha-api";
+import { fetchDiskIoMetrics, fetchServerMetrics } from "@/lib/nezha-api";
 import {
 	cn,
 	formatNezhaInfo,
@@ -76,6 +76,21 @@ type connectChartData = {
 	timeStamp: string;
 	tcp: number;
 	udp: number;
+};
+
+type loadChartData = {
+	timeStamp: string;
+	load1: number;
+	load5: number;
+	load15: number;
+};
+
+type diskIoChartData = {
+	timeStamp: string;
+	read: number;
+	write: number;
+	await: number;
+	util: number;
 };
 
 const MIN_HISTORY_LOADING_MS = 300;
@@ -208,48 +223,39 @@ export default function ServerDetailChart({
 				selectedPeriod={selectedPeriod}
 				onPeriodChange={setSelectedPeriod}
 			/>
-			<section className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-3 server-charts">
+			<section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 server-charts">
 				<CpuChart
 					now={nezhaWsData.now}
 					data={server}
 					messageHistory={messageHistory}
 					period={selectedPeriod}
 				/>
-				{gpuStats.length >= 1 && gpuList.length === gpuStats.length
-					? gpuList.map((gpu, index) => (
-							<GpuChart
-								index={index}
-								id={server.id}
-								now={nezhaWsData.now}
-								gpuStat={gpuStats[index]}
-								gpuName={gpu}
-								messageHistory={messageHistory}
-								period={selectedPeriod}
-								key={index}
-							/>
-						))
-					: gpuStats.length > 0
-						? gpuStats.map((gpu, index) => (
-								<GpuChart
-									index={index}
-									id={server.id}
-									now={nezhaWsData.now}
-									gpuStat={gpu}
-									gpuName={`#${index + 1}`}
-									messageHistory={messageHistory}
-									period={selectedPeriod}
-									key={index}
-								/>
-							))
-						: null}
 				<MemChart
 					now={nezhaWsData.now}
 					data={server}
 					messageHistory={messageHistory}
 					period={selectedPeriod}
 				/>
+				<LoadChart
+					now={nezhaWsData.now}
+					data={server}
+					messageHistory={messageHistory}
+					period={selectedPeriod}
+				/>
+				<GpuChart
+					id={server.id}
+					gpuStat={gpuStats.length > 0 ? gpuStats.reduce((sum, value) => sum + value, 0) / gpuStats.length : 0}
+					gpuName={gpuList.length > 1 ? `平均 (${gpuList.length} 张)` : gpuList[0]}
+					messageHistory={messageHistory}
+					period={selectedPeriod}
+				/>
 				<DiskChart
 					now={nezhaWsData.now}
+					data={server}
+					messageHistory={messageHistory}
+					period={selectedPeriod}
+				/>
+				<DiskIoChart
 					data={server}
 					messageHistory={messageHistory}
 					period={selectedPeriod}
@@ -348,15 +354,12 @@ function useHistoricalData<T>(
 
 function GpuChart({
 	id,
-	index,
 	gpuStat,
 	gpuName,
 	messageHistory,
 	period,
 }: {
-	now: number;
 	id: string;
-	index: number;
 	gpuStat: number;
 	gpuName?: string;
 	messageHistory: NezhaWebsocketResponse[];
@@ -396,7 +399,9 @@ function GpuChart({
 					const { gpu } = formatNezhaInfo(wsData.now, server);
 					return {
 						timeStamp: wsData.now.toString(),
-						gpu: gpu[index],
+						gpu: gpu.length > 0
+							? gpu.reduce((sum, value) => sum + value, 0) / gpu.length
+							: 0,
 					};
 				})
 				.filter((item): item is gpuChartData => item !== null)
@@ -406,7 +411,7 @@ function GpuChart({
 			hasInitialized.current = true;
 			setHistoryLoaded(true);
 		}
-	}, [messageHistory, id, index, period]);
+	}, [messageHistory, id, period]);
 
 	// Reset when switching to realtime
 	useEffect(() => {
@@ -417,7 +422,7 @@ function GpuChart({
 	}, [period]);
 
 	useEffect(() => {
-		if (gpuStat && historyLoaded && period === "realtime") {
+		if (historyLoaded && period === "realtime") {
 			const timestamp = Date.now().toString();
 			setGpuChartData((prevData) => {
 				let newData = [] as gpuChartData[];
@@ -2041,5 +2046,169 @@ function ConnectChart({
 				</section>
 			</CardContent>
 		</Card>
+	);
+}
+
+/** 负载单独成图，三个窗口都来自 CFSM 的 load_avg 字段。 */
+function LoadChart({
+	now,
+	data,
+	messageHistory,
+	period,
+}: {
+	now: number;
+	data: NezhaServer;
+	messageHistory: NezhaWebsocketResponse[];
+	period: ChartPeriod;
+}) {
+	const [realtime, setRealtime] = useState<loadChartData[]>([]);
+	const [history, setHistory] = useState<loadChartData[]>([]);
+	const [loading, setLoading] = useState(false);
+	// 旧探针或缓存快照可能还未包含负载字段，图表应以 0 安全降级。
+	const load1 = Number(data.state.load_1) || 0;
+	const load5 = Number(data.state.load_5) || 0;
+	const load15 = Number(data.state.load_15) || 0;
+
+	useEffect(() => {
+		if (period === "realtime") {
+			setHistory([]);
+			setLoading(false);
+			return;
+		}
+		let cancelled = false;
+		setLoading(true);
+		void Promise.all([
+			fetchServerMetrics(data.id, "load1", period),
+			fetchServerMetrics(data.id, "load5", period),
+			fetchServerMetrics(data.id, "load15", period),
+		]).then(([one, five, fifteen]) => {
+			if (cancelled) return;
+			const fiveByTime = new Map(five.data.data_points.map((point) => [point.ts, point.value]));
+			const fifteenByTime = new Map(fifteen.data.data_points.map((point) => [point.ts, point.value]));
+			setHistory(one.data.data_points.map((point) => ({
+				timeStamp: String(point.ts),
+				load1: point.value,
+				load5: fiveByTime.get(point.ts) || 0,
+				load15: fifteenByTime.get(point.ts) || 0,
+			})));
+		}).catch(() => {
+			if (!cancelled) setHistory([]);
+		}).finally(() => {
+			if (!cancelled) setLoading(false);
+		});
+		return () => { cancelled = true; };
+	}, [data.id, period]);
+
+	useEffect(() => {
+		if (period !== "realtime") return;
+		const initial = messageHistory.map((snapshot) => {
+			const item = snapshot.servers.find((server) => server.id === data.id);
+			return item ? {
+				timeStamp: String(snapshot.now),
+				load1: item.state.load_1,
+				load5: item.state.load_5,
+				load15: item.state.load_15,
+			} : null;
+		}).filter((item): item is loadChartData => item !== null).reverse();
+		setRealtime(initial.slice(-30));
+	}, [data.id, messageHistory, period]);
+
+	useEffect(() => {
+		if (period !== "realtime") return;
+		setRealtime((previous) => [...previous, {
+			timeStamp: String(now), load1, load5, load15,
+		}].slice(-30));
+	}, [load1, load5, load15, now, period]);
+
+	const chartConfig = {
+		load1: { label: "1 分" }, load5: { label: "5 分" }, load15: { label: "15 分" },
+	} satisfies ChartConfig;
+	const displayData = period === "realtime" ? realtime : history;
+	return (
+		<Card><CardContent className="px-6 py-3"><section className="flex flex-col gap-1">
+			<div className="flex items-center gap-4 text-xs">
+				<p className="font-medium">负载</p>
+				<span className="text-muted-foreground">1分 <b className="text-foreground">{load1.toFixed(2)}</b></span>
+				<span className="text-muted-foreground">5分 <b className="text-foreground">{load5.toFixed(2)}</b></span>
+				<span className="text-muted-foreground">15分 <b className="text-foreground">{load15.toFixed(2)}</b></span>
+			</div>
+			<ChartContainer config={chartConfig} className="aspect-auto h-[130px] w-full">
+				{loading ? <ChartSkeleton /> : <LineChart syncId="serverDetailCharts" accessibilityLayer data={displayData} margin={{ top: 12, left: 12, right: 12 }}>
+					<CartesianGrid vertical={false} /><XAxis dataKey="timeStamp" tickLine={false} axisLine={false} tickMargin={8} minTickGap={200} tickFormatter={formatRelativeTime} />
+					<YAxis tickLine={false} axisLine={false} mirror tickMargin={-15} />
+					<ChartTooltip isAnimationActive={false} content={<ChartTooltipContent indicator="dot" labelFormatter={(_, payload) => formatTime(Number(payload[0]?.payload?.timeStamp))} formatter={(value, name) => <div className="flex flex-1 items-center justify-between"><span>{chartConfig[String(name) as keyof typeof chartConfig]?.label}</span><span className="font-medium">{Number(value).toFixed(2)}</span></div>} />} />
+					<Line dataKey="load1" type="linear" stroke="hsl(var(--chart-1))" strokeWidth={1} dot={false} isAnimationActive={false} /><Line dataKey="load5" type="linear" stroke="hsl(var(--chart-4))" strokeWidth={1} dot={false} isAnimationActive={false} /><Line dataKey="load15" type="linear" stroke="hsl(var(--chart-5))" strokeWidth={1} dot={false} isAnimationActive={false} />
+				</LineChart>}
+			</ChartContainer>
+		</section></CardContent></Card>
+	);
+}
+
+/** 历史 API 一次返回六项 I/O 指标，图表用吞吐与利用率，悬浮提示保留其余指标。 */
+function DiskIoChart({
+	data,
+	messageHistory,
+	period,
+}: {
+	data: NezhaServer;
+	messageHistory: NezhaWebsocketResponse[];
+	period: ChartPeriod;
+}) {
+	const [realtime, setRealtime] = useState<diskIoChartData[]>([]);
+	const [history, setHistory] = useState<diskIoChartData[]>([]);
+	const [loading, setLoading] = useState(false);
+	// 磁盘 I/O 由较新的 CFSM Agent 上报；旧数据没有该对象时不阻塞详情页。
+	const io = data.state.disk_io ?? {
+		read_bps: 0,
+		write_bps: 0,
+		read_iops: 0,
+		write_iops: 0,
+		await_ms: 0,
+		util: 0,
+	};
+
+	useEffect(() => {
+		if (period === "realtime") { setHistory([]); setLoading(false); return; }
+		let cancelled = false;
+		setLoading(true);
+		void fetchDiskIoMetrics(data.id, period).then((points) => {
+			if (!cancelled) setHistory(points.map((point) => ({ timeStamp: String(point.ts), read: point.readBps / 1024 / 1024, write: point.writeBps / 1024 / 1024, await: point.awaitMs, util: point.util })));
+		}).catch(() => { if (!cancelled) setHistory([]); }).finally(() => { if (!cancelled) setLoading(false); });
+		return () => { cancelled = true; };
+	}, [data.id, period]);
+
+	useEffect(() => {
+		if (period !== "realtime") return;
+		setRealtime(messageHistory.map((snapshot) => {
+			const item = snapshot.servers.find((server) => server.id === data.id);
+			const snapshotIo = item?.state.disk_io;
+			return item ? {
+				timeStamp: String(snapshot.now),
+				read: (snapshotIo?.read_bps ?? 0) / 1024 / 1024,
+				write: (snapshotIo?.write_bps ?? 0) / 1024 / 1024,
+				await: snapshotIo?.await_ms ?? 0,
+				util: snapshotIo?.util ?? 0,
+			} : null;
+		}).filter((item): item is diskIoChartData => item !== null).reverse().slice(-30));
+	}, [data.id, messageHistory, period]);
+
+	useEffect(() => {
+		if (period !== "realtime") return;
+		setRealtime((previous) => [...previous, { timeStamp: String(Date.now()), read: io.read_bps / 1024 / 1024, write: io.write_bps / 1024 / 1024, await: io.await_ms, util: io.util }].slice(-30));
+	}, [io, period]);
+
+	const chartConfig = { read: { label: "读取" }, write: { label: "写入" }, util: { label: "利用率" } } satisfies ChartConfig;
+	const displayData = period === "realtime" ? realtime : history;
+	return (
+		<Card><CardContent className="px-6 py-3"><section className="flex flex-col gap-1">
+			<div className="flex items-center justify-between text-xs"><p className="font-medium">磁盘 I/O</p><span className="text-muted-foreground">读 {formatBytes(io.read_bps)}/s · 写 {formatBytes(io.write_bps)}/s · {io.util.toFixed(0)}%</span></div>
+			<ChartContainer config={chartConfig} className="aspect-auto h-[130px] w-full">
+				{loading ? <ChartSkeleton /> : <LineChart syncId="serverDetailCharts" accessibilityLayer data={displayData} margin={{ top: 12, left: 12, right: 12 }}>
+					<CartesianGrid vertical={false} /><XAxis dataKey="timeStamp" tickLine={false} axisLine={false} tickMargin={8} minTickGap={200} tickFormatter={formatRelativeTime} /><YAxis yAxisId="speed" tickLine={false} axisLine={false} mirror tickMargin={-15} tickFormatter={(value) => `${value.toFixed(0)}M`} /><YAxis yAxisId="util" orientation="right" domain={[0, 100]} hide />
+					<ChartTooltip isAnimationActive={false} content={<ChartTooltipContent indicator="dot" labelFormatter={(_, payload) => formatTime(Number(payload[0]?.payload?.timeStamp))} formatter={(value, name) => <div className="flex flex-1 items-center justify-between"><span>{chartConfig[String(name) as keyof typeof chartConfig]?.label}</span><span className="font-medium">{name === "util" ? `${Number(value).toFixed(1)}%` : `${Number(value).toFixed(2)} MiB/s`}</span></div>} />} />
+					<Line yAxisId="speed" dataKey="read" type="linear" stroke="hsl(var(--chart-1))" strokeWidth={1} dot={false} isAnimationActive={false} /><Line yAxisId="speed" dataKey="write" type="linear" stroke="hsl(var(--chart-4))" strokeWidth={1} dot={false} isAnimationActive={false} /><Line yAxisId="util" dataKey="util" type="linear" stroke="hsl(var(--chart-5))" strokeWidth={1} dot={false} isAnimationActive={false} />
+				</LineChart>}
+			</ChartContainer>
+		</section></CardContent></Card>
 	);
 }

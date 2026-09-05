@@ -1,12 +1,14 @@
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mergeServer } from "@/cfsm/adapter";
-import { getConfig, getServers } from "@/cfsm/api";
+import { getAdminToken, getConfig, getServers } from "@/cfsm/api";
 import { toNezhaServer } from "@/cfsm/nezha-bridge";
-import type { CfsmServer } from "@/cfsm/types";
+import type { CfsmServer, ServersResponse } from "@/cfsm/types";
 import type { NezhaWebsocketResponse } from "@/types/nezha-api";
 import {
 	WebSocketContext,
+	defaultSiteDisplayConfig,
+	type SiteDisplayConfig,
 	type WebSocketContextType,
 } from "./websocket-context";
 
@@ -18,7 +20,27 @@ function webSocketUrl() {
 	const url = new URL("/api/ws", window.location.origin);
 	url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
 	url.searchParams.set("subscribe", "all");
+	// 浏览器 WebSocket 无法携带 Authorization 请求头；CFSM 官方接口支持
+	// token 查询参数，使用后台登录后保存的 JWT 访问私有站点。
+	const token = getAdminToken();
+	if (token) url.searchParams.set("token", token);
 	return url.toString();
+}
+
+function enabled(value: unknown) {
+	return value === undefined || value === null || value === true || value === "true" || value === "1";
+}
+
+function toSiteDisplayConfig(response: ServersResponse): SiteDisplayConfig {
+	const config = response.sysConfig;
+	if (!config) return defaultSiteDisplayConfig;
+	return {
+		showPrice: enabled(config.show_price),
+		showExpire: enabled(config.show_expire),
+		showTraffic: enabled(config.show_tf),
+		showThreeNetDetails: enabled(config.show_three_net_details),
+		displayMode: config.display_mode,
+	};
 }
 
 /**
@@ -30,6 +52,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 	const [messageHistory, setMessageHistory] = useState<NezhaWebsocketResponse[]>([]);
 	const [connected, setConnected] = useState(false);
 	const [needReconnect, setNeedReconnect] = useState(false);
+	const [siteDisplayConfig, setSiteDisplayConfig] = useState<SiteDisplayConfig>(
+		defaultSiteDisplayConfig,
+	);
 	const rawServersRef = useRef<CfsmServer[]>([]);
 	const socketRef = useRef<WebSocket | null>(null);
 	const retryRef = useRef<number | null>(null);
@@ -73,6 +98,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 	const refresh = useCallback(async () => {
 		const [serversResponse, config] = await Promise.all([getServers(), getConfig()]);
 		rawServersRef.current = serversResponse.servers;
+		setSiteDisplayConfig(toSiteDisplayConfig(serversResponse));
 		timeoutMinutesRef.current = Number(config.frontend_ws_timeout_minutes) || 0;
 		publish(rawServersRef.current);
 	}, [publish]);
@@ -174,6 +200,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 		reconnect,
 		needReconnect,
 		setNeedReconnect,
+		siteDisplayConfig,
 	};
 
 	return <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>;

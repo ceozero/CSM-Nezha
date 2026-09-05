@@ -96,6 +96,14 @@ export interface CfsmConfig {
 
 export interface ServersResponse {
 	servers: CfsmServer[];
+	/** 后台站点设置的前台显示开关；未返回时主题保持完整显示。 */
+	sysConfig?: {
+		show_price?: boolean | "true" | "false" | "1" | "0";
+		show_expire?: boolean | "true" | "false" | "1" | "0";
+		show_tf?: boolean | "true" | "false" | "1" | "0";
+		show_three_net_details?: boolean | "true" | "false" | "1" | "0";
+		display_mode?: string;
+	};
 	stats?: {
 		total: number;
 		online: number;
