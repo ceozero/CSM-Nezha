@@ -60,17 +60,6 @@ function formatDate(value: Date) {
 	}).format(value);
 }
 
-function formatResetDate(value: Date) {
-	return new Intl.DateTimeFormat("zh-CN", {
-		year: "numeric",
-		month: "numeric",
-		day: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	}).format(value);
-}
-
 function calcTypeLabel(
 	calcType: NezhaServer["state"]["traffic_calc_type"],
 	t: ReturnType<typeof useTranslation>["t"],
@@ -104,7 +93,7 @@ export default function TrafficQuotaBoard({
 		<section
 			data-testid="traffic-quota-board"
 			aria-label={t("trafficQuota.title", "月流量看板")}
-			className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3"
+			className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"
 		>
 			{quotaServers.map((server) => {
 				const { state } = server;
@@ -157,17 +146,17 @@ export default function TrafficQuotaBoard({
 							/>
 						</div>
 
-						<div className="mt-3 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
-							<span className="tabular-nums">
-								↑ {formatBytes(state.net_out_monthly_transfer)}　↓ {formatBytes(state.net_in_monthly_transfer)}
-							</span>
+						<div className="mt-3 flex min-w-0 items-center justify-between gap-3 whitespace-nowrap text-[10px] text-muted-foreground">
 							{cycle ? (
-								<span className="text-right tabular-nums">
-									{t("trafficQuota.cycle", "本周期")} {formatDate(cycle.from)} - {formatDate(cycle.to)}　{t("trafficQuota.nextReset", "下次重置")} {formatResetDate(cycle.to)}
+								<span className="shrink-0 tabular-nums">
+									周期 {formatDate(cycle.from)} - {formatDate(cycle.to)}
 								</span>
 							) : (
-								<span>{t("trafficQuota.noAutoReset", "不自动重置")}</span>
+								<span className="shrink-0">{t("trafficQuota.noAutoReset", "不自动重置")}</span>
 							)}
+							<span className="ml-auto shrink-0 tabular-nums">
+								↑ {formatBytes(state.net_out_monthly_transfer)}　↓ {formatBytes(state.net_in_monthly_transfer)}
+							</span>
 						</div>
 					</article>
 				);
