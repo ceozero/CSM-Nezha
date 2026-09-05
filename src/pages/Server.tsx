@@ -3,7 +3,6 @@ import {
 	ArrowsUpDownIcon,
 	ArrowUpIcon,
 	ChartBarSquareIcon,
-	ChevronDownIcon,
 	MapIcon,
 	ServerStackIcon,
 	ViewColumnsIcon,
@@ -18,6 +17,13 @@ import ServerCard from "@/components/ServerCard";
 import ServerCardInline from "@/components/ServerCardInline";
 import ServerOverview from "@/components/ServerOverview";
 import { ServiceTracker } from "@/components/ServiceTracker";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { SORT_TYPES } from "@/context/sort-context";
 import { useSort } from "@/hooks/use-sort";
 import { useStatus } from "@/hooks/use-status";
@@ -550,32 +556,34 @@ export default function Servers({
 						</span>
 					</button>
 					<span className="text-stone-300 dark:text-stone-600 mb-0.5">|</span>
-					<span className="relative ml-2 mr-2 flex h-full min-w-17 items-center rounded-full focus-within:ring-1 focus-within:ring-blue-500/60">
-						<select
-							aria-label="Sort metric"
+					<div className="ml-2 mr-2 shrink-0">
+						<Select
 							value={sortType}
-							onChange={(e) => {
-								const val = e.target.value as typeof sortType;
+							onValueChange={(value) => {
+								const val = value as typeof sortType;
 								setSortType(val);
 								if (val === "default") setSortOrder("desc");
 							}}
-							className="h-full w-full cursor-pointer appearance-none bg-transparent py-0 pr-5 text-sm font-medium text-current outline-none"
 						>
+							<SelectTrigger
+								aria-label="Sort metric"
+								className="h-7 min-w-22 rounded-full border-transparent bg-stone-100/80 px-3 text-sm font-medium text-current shadow-none transition-colors hover:bg-stone-200/80 focus:ring-2 focus:ring-stone-400/30 focus:ring-offset-0 dark:bg-stone-700/70 dark:hover:bg-stone-700 dark:focus:ring-stone-400/35"
+							>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent className="min-w-28 rounded-xl border-stone-200/80 bg-white/95 p-1.5 shadow-xl backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/95">
 							{SORT_TYPES.map((type) => (
-								<option
+								<SelectItem
 									key={type}
 									value={type}
-									className="bg-white text-stone-900 dark:bg-stone-900 dark:text-stone-100"
+									className="rounded-lg py-2 pl-8 pr-3 text-stone-700 focus:bg-blue-50 focus:text-blue-700 dark:text-stone-200 dark:focus:bg-blue-950/60 dark:focus:text-blue-200"
 								>
 									{t(`sort.types.${type.replace(/ /g, "_")}`)}
-								</option>
+								</SelectItem>
 							))}
-						</select>
-						<ChevronDownIcon
-							aria-hidden
-							className="pointer-events-none absolute right-0 size-3.5 text-current"
-						/>
-					</span>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 			</div>
 			{hasServers && showMap === "1" && (
