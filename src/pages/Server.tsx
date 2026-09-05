@@ -17,6 +17,7 @@ import ServerCard from "@/components/ServerCard";
 import ServerCardInline from "@/components/ServerCardInline";
 import ServerOverview from "@/components/ServerOverview";
 import { ServiceTracker } from "@/components/ServiceTracker";
+import TrafficQuotaBoard from "@/components/TrafficQuotaBoard";
 import {
 	Select,
 	SelectContent,
@@ -134,6 +135,9 @@ export default function Servers({
 	const hasRestoredScroll = useRef(false);
 	const [currentGroup, setCurrentGroup] = useState<string>("All");
 	const nezhaWsData = lastData;
+	const hasTrafficQuota = (nezhaWsData?.servers ?? []).some(
+		(server) => server.state.traffic_limit > 0,
+	);
 
 	const customBackgroundImage =
 		(window.CustomBackgroundImage as string) !== ""
@@ -177,10 +181,10 @@ export default function Servers({
 	}, []);
 
 	useEffect(() => {
-		if (!hasServices) {
+		if (!hasServices && !hasTrafficQuota) {
 			setShowServices("0");
 		}
-	}, [hasServices]);
+	}, [hasServices, hasTrafficQuota]);
 
 	useEffect(() => {
 		const checkInlineSettings = () => {
@@ -476,8 +480,10 @@ export default function Servers({
 					>
 						<MapIcon className="size-[13px]" />
 					</button>
-					{hasServices && (
+					{(hasServices || hasTrafficQuota) && (
 						<button
+							aria-label={t("trafficQuota.toggle", "切换月流量看板")}
+							title={t("trafficQuota.title", "月流量看板")}
 							onClick={() => {
 								setShowServices(showServices === "0" ? "1" : "0");
 								localStorage.setItem(
@@ -589,7 +595,10 @@ export default function Servers({
 			{hasServers && showMap === "1" && (
 				<GlobalMap now={nezhaWsData.now} serverList={nezhaWsData.servers} />
 			)}
-			{hasServers && showServices === "1" && (
+			{hasServers && showServices === "1" && hasTrafficQuota && (
+				<TrafficQuotaBoard serverList={filteredServers} />
+			)}
+			{hasServers && showServices === "1" && hasServices && (
 				<ServiceTracker serverList={filteredServers} />
 			)}
 			{!hasServers ? (

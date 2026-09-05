@@ -31,6 +31,8 @@ export interface CfsmServer {
 	net_tx?: number;
 	net_rx_monthly?: number;
 	net_tx_monthly?: number;
+	/** 每月流量重置日；0 表示不自动重置。 */
+	reset_day?: number;
 	processes?: number;
 	tcp_conn?: number;
 	udp_conn?: number;

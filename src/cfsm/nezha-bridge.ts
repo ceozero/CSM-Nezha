@@ -168,6 +168,7 @@ export function toNezhaServer(server: CfsmServer): NezhaServer {
 			net_out_monthly_transfer: numberValue(server.net_tx_monthly),
 			traffic_limit: trafficLimitInGiB(server.traffic_limit),
 			traffic_calc_type: trafficCalcType(server.traffic_calc_type),
+			traffic_reset_day: numberValue(server.reset_day),
 			net_in_speed: numberValue(server.net_in_speed),
 			net_out_speed: numberValue(server.net_out_speed),
 			uptime,

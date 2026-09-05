@@ -41,6 +41,8 @@ export interface NezhaServerStatus {
 	/** CFSM 流量上限使用 GiB 数值保存，0 表示未设置上限。 */
 	traffic_limit: number;
 	traffic_calc_type: "total" | "ul" | "dl" | "max";
+	/** CFSM 月流量重置日；0 表示不自动重置。 */
+	traffic_reset_day: number;
 	net_in_speed: number;
 	net_out_speed: number;
 	uptime: number;

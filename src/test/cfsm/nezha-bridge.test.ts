@@ -28,6 +28,7 @@ describe("toNezhaServer", () => {
 			name: "edge-traffic-limit",
 			traffic_limit: "10000.0",
 			traffic_calc_type: "max",
+			reset_day: 15,
 			net_rx_monthly: 2 * 1024 ** 3,
 			net_tx_monthly: 3 * 1024 ** 3,
 		});
@@ -40,6 +41,7 @@ describe("toNezhaServer", () => {
 			net_out_monthly_transfer: 3 * 1024 ** 3,
 			traffic_limit: 10000,
 			traffic_calc_type: "max",
+			traffic_reset_day: 15,
 		});
 
 		const smallerPlan = toNezhaServer({

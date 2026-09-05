@@ -29,6 +29,7 @@ const baseState: NezhaServer["state"] = {
 	net_out_monthly_transfer: 2 * 1024 ** 3,
 	traffic_limit: 0,
 	traffic_calc_type: "total",
+	traffic_reset_day: 1,
 	net_in_speed: 1024 ** 2,
 	net_out_speed: 2 * 1024 ** 2,
 	uptime: 86_400,

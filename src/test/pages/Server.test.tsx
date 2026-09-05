@@ -533,6 +533,47 @@ describe("Servers page", () => {
 		expect(localStorage.getItem("showServices")).toBe("1");
 	});
 
+	it("uses the chart control to show the CFSM monthly traffic quota board", async () => {
+		const user = userEvent.setup();
+		const limited = createServer({
+			id: 1,
+			name: "quota-server",
+			state: {
+				net_in_monthly_transfer: 3 * 1024 ** 3,
+				net_out_monthly_transfer: 2 * 1024 ** 3,
+				traffic_limit: 10,
+				traffic_calc_type: "total",
+				traffic_reset_day: 1,
+			},
+		});
+
+		const { container } = renderServerPage({
+			connected: true,
+			lastData: websocketPayload([limited]),
+		});
+
+		await waitFor(() => {
+			expect(
+				container.querySelectorAll(
+					".server-overview-controls section > button",
+				),
+			).toHaveLength(3);
+		});
+
+		const controls = container.querySelectorAll(
+			".server-overview-controls section > button",
+		);
+		await user.click(controls[1]);
+
+		expect(screen.getByTestId("traffic-quota-board")).toHaveTextContent(
+			"quota-server",
+		);
+		expect(screen.getByTestId("traffic-quota-board")).toHaveTextContent(
+			"5.00 GiB / 10.00 GiB",
+		);
+		expect(localStorage.getItem("showServices")).toBe("1");
+	});
+
 	it("does not enable inline cards from storage on mobile widths", () => {
 		localStorage.setItem("inline", "1");
 		Object.defineProperty(window, "innerWidth", {

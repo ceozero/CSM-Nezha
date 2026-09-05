@@ -49,6 +49,21 @@
 		"total": "总计",
 		"nextUpdate": "下次更新"
 	},
+	"trafficQuota": {
+		"title": "月流量看板",
+		"toggle": "切换月流量看板",
+		"total": "合计",
+		"upload": "仅上行",
+		"download": "仅下行",
+		"max": "峰值计费",
+		"normal": "正常",
+		"attention": "注意",
+		"critical": "即将超额",
+		"exceeded": "已超额",
+		"cycle": "本周期",
+		"nextReset": "下次重置",
+		"noAutoReset": "不自动重置"
+	},
 	"serviceTracker": {
 		"noService": "无服务数据",
 		"uptime": "在线率",
