@@ -117,12 +117,30 @@ const calculatePacketLoss = (delays: number[]): number[] => {
 export function NetworkChart({
 	server_id,
 	show,
+	period: controlledPeriod,
+	onPeriodChange,
+	peakCutEnabled: controlledPeakCutEnabled,
+	onPeakCutChange,
+	showToolbar = true,
 }: {
 	server_id: string;
 	show: boolean;
+	period?: MonitorPeriod;
+	onPeriodChange?: (period: MonitorPeriod) => void;
+	peakCutEnabled?: boolean;
+	onPeakCutChange?: (enabled: boolean) => void;
+	/** 独立使用时显示完整工具栏，详情页复用顶部时间范围时隐藏。 */
+	showToolbar?: boolean;
 }) {
 	const { t } = useTranslation();
-	const [period, setPeriod] = React.useState<MonitorPeriod>("realtime");
+	const [localPeriod, setLocalPeriod] = React.useState<MonitorPeriod>("realtime");
+	const period = controlledPeriod ?? localPeriod;
+	const handlePeriodChange = (nextPeriod: MonitorPeriod) => {
+		if (controlledPeriod === undefined) {
+			setLocalPeriod(nextPeriod);
+		}
+		onPeriodChange?.(nextPeriod);
+	};
 
 	const { data: monitorData, isPlaceholderData } = useQuery({
 		queryKey: ["monitor", server_id, period],
@@ -200,7 +218,10 @@ export function NetworkChart({
 			isPeriodLoading={isPlaceholderData}
 			canAccessLongHistory={hasAdminToken()}
 			period={period}
-			onPeriodChange={setPeriod}
+			onPeriodChange={handlePeriodChange}
+			peakCutEnabled={controlledPeakCutEnabled}
+			onPeakCutChange={onPeakCutChange}
+			showToolbar={showToolbar}
 		/>
 	);
 }
@@ -215,6 +236,9 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 	canAccessLongHistory = true,
 	period,
 	onPeriodChange,
+	peakCutEnabled: controlledPeakCutEnabled,
+	onPeakCutChange,
+	showToolbar = true,
 }: {
 	chartDataKey: string[];
 	chartConfig: ChartConfig;
@@ -225,6 +249,9 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 	canAccessLongHistory?: boolean;
 	period: MonitorPeriod;
 	onPeriodChange: (period: MonitorPeriod) => void;
+	peakCutEnabled?: boolean;
+	onPeakCutChange?: (enabled: boolean) => void;
+	showToolbar?: boolean;
 }) {
 	const { t } = useTranslation();
 	const [showPeriodLoading, setShowPeriodLoading] = React.useState(false);
@@ -289,7 +316,15 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 
 	// Change from string to string array for multi-selection
 	const [activeCharts, setActiveCharts] = React.useState<string[]>([]);
-	const [isPeakEnabled, setIsPeakEnabled] = React.useState(forcePeakCutEnabled);
+	const [localPeakCutEnabled, setLocalPeakCutEnabled] =
+		React.useState(forcePeakCutEnabled);
+	const isPeakEnabled = controlledPeakCutEnabled ?? localPeakCutEnabled;
+	const setIsPeakEnabled = (enabled: boolean) => {
+		if (controlledPeakCutEnabled === undefined) {
+			setLocalPeakCutEnabled(enabled);
+		}
+		onPeakCutChange?.(enabled);
+	};
 
 	// Function to clear all selected charts
 	const clearAllSelections = useCallback(() => {
@@ -573,12 +608,13 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="flex flex-wrap items-center gap-3">
-				<TooltipProvider delayDuration={120}>
-					<div
-						ref={containerRef}
-						className="relative flex items-center gap-1 rounded-full bg-muted dark:bg-muted/40 p-0.5 border border-border/60 dark:border-border"
-					>
+			{showToolbar && (
+				<div className="flex flex-wrap items-center gap-3">
+					<TooltipProvider delayDuration={120}>
+						<div
+							ref={containerRef}
+							className="relative flex items-center gap-1 rounded-full bg-muted dark:bg-muted/40 p-0.5 border border-border/60 dark:border-border"
+						>
 						{indicator && (
 							<div
 								className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
@@ -625,19 +661,20 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 								</div>
 							);
 						})}
+						</div>
+					</TooltipProvider>
+					<div className="flex items-center space-x-2">
+						<Switch
+							id="Peak"
+							checked={isPeakEnabled}
+							onCheckedChange={setIsPeakEnabled}
+						/>
+						<Label className="text-xs" htmlFor="Peak">
+							{t("monitor.peakCut")}
+						</Label>
 					</div>
-				</TooltipProvider>
-				<div className="flex items-center space-x-2">
-					<Switch
-						id="Peak"
-						checked={isPeakEnabled}
-						onCheckedChange={setIsPeakEnabled}
-					/>
-					<Label className="text-xs" htmlFor="Peak">
-						{t("monitor.peakCut")}
-					</Label>
 				</div>
-			</div>
+			)}
 			<Card
 				className={cn({
 					"bg-card/70": customBackgroundImage,

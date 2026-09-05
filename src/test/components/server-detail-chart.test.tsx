@@ -252,6 +252,33 @@ describe("ServerDetailChart", () => {
 		});
 	});
 
+	it("允许详情页控制时间范围，并在右侧渲染附加控件", async () => {
+		const user = userEvent.setup();
+		const onPeriodChange = vi.fn();
+		seedWebSocketData();
+
+		renderWithQuery(
+			<ServerDetailChart
+				server_id="7"
+				period="1d"
+				onPeriodChange={onPeriodChange}
+				toolbarTrailing={<span>削峰</span>}
+			/>,
+		);
+
+		expect(await screen.findByText("削峰")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(detailChartMocks.fetchServerMetrics).toHaveBeenCalledWith(
+				"7",
+				"cpu",
+				"1d",
+			);
+		});
+
+		await user.click(screen.getByText("serverDetailChart.realtime"));
+		expect(onPeriodChange).toHaveBeenCalledWith("realtime");
+	});
+
 	it("fetches every historical metric group for the selected period", async () => {
 		const user = userEvent.setup();
 		seedWebSocketData();

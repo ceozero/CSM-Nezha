@@ -180,6 +180,27 @@ describe("NetworkChart", () => {
 		});
 	});
 
+	it("支持由详情页控制时间范围并隐藏重复工具栏", async () => {
+		apiMocks.fetchMonitor.mockResolvedValue({
+			success: true,
+			data: monitorData,
+		});
+
+		renderWithQuery(
+			<NetworkChart
+				server_id="7"
+				show={true}
+				period="1d"
+				showToolbar={false}
+			/>,
+		);
+
+		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
+		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d");
+		expect(screen.queryByText("monitor.period1d")).not.toBeInTheDocument();
+		expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+	});
+
 	it("禁用未登录用户的 3 天和 7 天历史范围", async () => {
 		const user = userEvent.setup();
 		const onPeriodChange = vi.fn();

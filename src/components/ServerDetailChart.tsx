@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Area,
@@ -38,7 +38,9 @@ import ChartSkeleton from "./loading/ChartSkeleton";
 import { ServerDetailChartLoading } from "./loading/ServerDetailLoading";
 import AnimatedCircularProgressBar from "./ui/animated-circular-progress-bar";
 
-type ChartPeriod = "realtime" | MetricPeriod;
+export type DetailChartPeriod = "realtime" | MetricPeriod;
+// 保留内部图表的既有类型名称，详情页通过导出的类型复用同一套时间范围。
+type ChartPeriod = DetailChartPeriod;
 
 type gpuChartData = {
 	timeStamp: string;
@@ -102,13 +104,15 @@ const sleep = (ms: number) =>
 function PeriodSelector({
 	selectedPeriod,
 	onPeriodChange,
+	trailing,
 }: {
-	selectedPeriod: ChartPeriod;
-	onPeriodChange: (period: ChartPeriod) => void;
+	selectedPeriod: DetailChartPeriod;
+	onPeriodChange: (period: DetailChartPeriod) => void;
+	trailing?: ReactNode;
 }) {
 	const { t } = useTranslation();
 
-	const periods = useMemo<{ value: ChartPeriod; label: string }[]>(
+	const periods = useMemo<{ value: DetailChartPeriod; label: string }[]>(
 		() => [
 			{ value: "realtime", label: t("serverDetailChart.realtime") },
 			{ value: "10m", label: t("serverDetailChart.period10m", "10 分") },
@@ -130,61 +134,65 @@ function PeriodSelector({
 
 	return (
 		<TooltipProvider delayDuration={120}>
-			<div
-				ref={containerRef}
-				className="relative mb-3 flex w-fit flex-wrap gap-0.5 rounded-full border border-border/60 bg-muted p-0.5 dark:border-border dark:bg-muted/40"
-			>
-				{indicator && (
-					<div
-						className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
-						style={{
-							height: indicator.height,
-							transform: `translate(${indicator.x}px, ${indicator.y}px)`,
-							transition: indicator.shouldAnimate
-								? "transform 0.5s var(--timing), width 0.5s var(--timing), height 0.5s var(--timing)"
-								: "none",
-							width: indicator.width,
-						}}
-					/>
-				)}
-				{periods.map((period, index) => {
-					const requiresLogin =
-						period.value === "3d" || period.value === "7d";
-					const isDisabled = requiresLogin && !hasAdminToken();
-					return (
-						<div key={period.value}
-						ref={setItemRef(index)}
-						onClick={() => {
-							if (isDisabled) return;
-							if (selectedPeriod !== period.value) {
-									enableIndicatorAnimation();
-								}
-								onPeriodChange(period.value);
+			<div className="mb-3 flex flex-wrap items-center gap-3">
+				<div
+					ref={containerRef}
+					className="relative flex w-fit flex-wrap gap-0.5 rounded-full border border-border/60 bg-muted p-0.5 dark:border-border dark:bg-muted/40"
+				>
+					{indicator && (
+						<div
+							className="active-indicator-fade-in absolute left-0 top-0 z-10 bg-white dark:bg-background rounded-full ring-1 ring-border/60 dark:ring-border/40"
+							style={{
+								height: indicator.height,
+								transform: `translate(${indicator.x}px, ${indicator.y}px)`,
+								transition: indicator.shouldAnimate
+									? "transform 0.5s var(--timing), width 0.5s var(--timing), height 0.5s var(--timing)"
+									: "none",
+								width: indicator.width,
 							}}
-						className={cn(
-							"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
-							isDisabled
-								? "cursor-not-allowed text-muted-foreground/40 opacity-60"
-								: selectedPeriod === period.value
-								? "text-foreground"
-								: "text-muted-foreground hover:text-foreground",
-						)}
-						aria-disabled={isDisabled}
-						title={
-							isDisabled
-								? t("serverDetailChart.loginRequired", "请登录后查看")
-								: undefined
-						}
-						>
-							<div className="relative z-20 flex items-center gap-1.5">
-								{period.value === "realtime" && (
-									<span className="inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 dark:bg-emerald-400"></span>
+						/>
+					)}
+					{periods.map((period, index) => {
+						const requiresLogin =
+							period.value === "3d" || period.value === "7d";
+						const isDisabled = requiresLogin && !hasAdminToken();
+						return (
+							<div
+								key={period.value}
+								ref={setItemRef(index)}
+								onClick={() => {
+									if (isDisabled) return;
+									if (selectedPeriod !== period.value) {
+										enableIndicatorAnimation();
+									}
+									onPeriodChange(period.value);
+								}}
+								className={cn(
+									"relative cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
+									isDisabled
+										? "cursor-not-allowed text-muted-foreground/40 opacity-60"
+										: selectedPeriod === period.value
+											? "text-foreground"
+											: "text-muted-foreground hover:text-foreground",
 								)}
-								{period.label}
+								aria-disabled={isDisabled}
+								title={
+									isDisabled
+										? t("serverDetailChart.loginRequired", "请登录后查看")
+										: undefined
+								}
+							>
+								<div className="relative z-20 flex items-center gap-1.5">
+									{period.value === "realtime" && (
+										<span className="inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 dark:bg-emerald-400"></span>
+									)}
+									{period.label}
+								</div>
 							</div>
-						</div>
-					);
-				})}
+						);
+					})}
+				</div>
+				{trailing}
 			</div>
 		</TooltipProvider>
 	);
@@ -192,11 +200,22 @@ function PeriodSelector({
 
 export default function ServerDetailChart({
 	server_id,
+	period: controlledPeriod,
+	onPeriodChange,
+	toolbarTrailing,
 }: {
 	server_id: string;
+	period?: DetailChartPeriod;
+	onPeriodChange?: (period: DetailChartPeriod) => void;
+	toolbarTrailing?: ReactNode;
 }) {
 	const { lastData, connected, messageHistory } = useWebSocketContext();
-	const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>("realtime");
+	const [localPeriod, setLocalPeriod] = useState<DetailChartPeriod>("realtime");
+	const selectedPeriod = controlledPeriod ?? localPeriod;
+	const setSelectedPeriod = (period: DetailChartPeriod) => {
+		if (controlledPeriod === undefined) setLocalPeriod(period);
+		onPeriodChange?.(period);
+	};
 
 	if (!connected && !lastData) {
 		return <ServerDetailChartLoading />;
@@ -222,6 +241,7 @@ export default function ServerDetailChart({
 			<PeriodSelector
 				selectedPeriod={selectedPeriod}
 				onPeriodChange={setSelectedPeriod}
+				trailing={toolbarTrailing}
 			/>
 			<section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 server-charts">
 				<CpuChart
