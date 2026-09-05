@@ -120,14 +120,14 @@ describe("ServerCard", () => {
 		expect(screen.getByText("/server/7")).toBeInTheDocument();
 	});
 
-	it("shows the newest available network latency and zero packet loss", () => {
+	it("shows the newest available network latency with loss severity colors", () => {
 		const server = createServer({
 			name: "edge-latency",
 			state: {
 				network_latency: {
-					ct: { delay: 125, loss: 16 },
-					cu: { delay: 127, loss: 0 },
-					cm: { delay: 84, loss: 0 },
+					ct: { delay: 125, loss: 10 },
+					cu: { delay: 127, loss: 3 },
+					cm: { delay: 84, loss: 1 },
 					bd: { delay: 51, loss: 0 },
 				},
 			},
@@ -138,10 +138,14 @@ describe("ServerCard", () => {
 		);
 
 		const latency = screen.getByLabelText("最新线路延迟");
-		expect(latency).toHaveTextContent("电信125ms丢 16%");
-		expect(latency).toHaveTextContent("联通127ms丢 0%");
-		expect(latency).toHaveTextContent("移动84ms丢 0%");
+		expect(latency).toHaveTextContent("电信125ms丢 10%");
+		expect(latency).toHaveTextContent("联通127ms丢 3%");
+		expect(latency).toHaveTextContent("移动84ms丢 1%");
 		expect(latency).toHaveTextContent("BGP51ms丢 0%");
+		expect(screen.getByText("丢 10%")).toHaveClass("font-bold", "text-rose-500");
+		expect(screen.getByText("丢 3%")).toHaveClass("text-orange-500");
+		expect(screen.getByText("丢 1%")).toHaveClass("text-amber-500");
+		expect(screen.getByText("丢 0%")).toHaveClass("text-emerald-600");
 	});
 
 	it("uses the left transfer box for the monthly quota and the right one for total traffic", () => {

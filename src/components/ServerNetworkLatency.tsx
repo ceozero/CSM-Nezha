@@ -14,6 +14,14 @@ function latencyTone(delay: number, loss?: number) {
 	return "text-emerald-600 dark:text-emerald-400";
 }
 
+/** 丢包独立分级，避免被延迟颜色覆盖。 */
+function lossTone(loss: number) {
+	if (loss >= 10) return "font-bold text-rose-500 dark:text-rose-400";
+	if (loss >= 3) return "font-medium text-orange-500 dark:text-orange-400";
+	if (loss > 0) return "font-medium text-amber-500 dark:text-amber-400";
+	return "font-medium text-emerald-600 dark:text-emerald-400";
+}
+
 /** 在首页卡片展示 CFSM 当前采样的线路延迟，不额外请求历史数据。 */
 export default function ServerNetworkLatency({
 	latency,
@@ -44,7 +52,7 @@ export default function ServerNetworkLatency({
 						{Math.round(route.delay)}ms
 					</span>
 					{route.loss !== undefined && (
-						<span className="font-medium text-rose-500 dark:text-rose-400">
+						<span className={cn(lossTone(route.loss), "tabular-nums")}>
 							丢 {Math.round(route.loss)}%
 						</span>
 					)}
