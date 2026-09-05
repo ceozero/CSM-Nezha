@@ -132,7 +132,7 @@ function PeriodSelector({
 		<TooltipProvider delayDuration={120}>
 			<div
 				ref={containerRef}
-				className="relative flex gap-0.5 mb-3 flex-wrap sm:-mt-5 -mt-3 p-0.5 bg-muted dark:bg-muted/40 rounded-full w-fit border border-border/60 dark:border-border"
+				className="relative mt-2 mb-3 flex w-fit flex-wrap gap-0.5 rounded-full border border-border/60 bg-muted p-0.5 dark:border-border dark:bg-muted/40"
 			>
 				{indicator && (
 					<div

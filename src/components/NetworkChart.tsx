@@ -573,7 +573,7 @@ export const NetworkChartClient = React.memo(function NetworkChart({
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="flex items-center gap-3 sm:-mt-5 -mt-3 flex-wrap">
+			<div className="mt-2 flex flex-wrap items-center gap-3">
 				<TooltipProvider delayDuration={120}>
 					<div
 						ref={containerRef}
