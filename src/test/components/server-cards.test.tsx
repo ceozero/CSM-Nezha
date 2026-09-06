@@ -85,7 +85,7 @@ describe("ServerCard", () => {
 			id: 7,
 			name: "edge-online",
 			public_note: publicNote,
-			host: { platform: "Windows Server" },
+			host: { platform: "Windows Server", arch: "aarch64", cpu: ["Ampere Altra"] },
 		});
 
 		renderWithProviders(
@@ -105,6 +105,7 @@ describe("ServerCard", () => {
 		expect(screen.getAllByText("↑ 2.00 GiB")).toHaveLength(2);
 		expect(screen.getAllByText("↓ 1.00 GiB")).toHaveLength(2);
 		expect(screen.getByText("1Gbps")).toBeInTheDocument();
+		expect(screen.getByText("ARM64")).toBeInTheDocument();
 		expect(
 			screen.getAllByText(/billingInfo.remaining: 16/).length,
 		).toBeGreaterThan(0);

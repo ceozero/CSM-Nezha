@@ -2,46 +2,56 @@ import { cn, type PublicNoteData } from "@/lib/utils";
 
 export default function PlanInfo({
 	parsedData,
+	architectureBadge,
 	showTraffic = true,
 }: {
-	parsedData: PublicNoteData;
+	parsedData?: PublicNoteData | null;
+	architectureBadge?: string | null;
 	showTraffic?: boolean;
 }) {
-	if (!parsedData?.planDataMod) {
+	const planData = parsedData?.planDataMod;
+	if (!planData && !architectureBadge) {
 		return null;
 	}
 
 	const extraList =
-		parsedData.planDataMod.extra.split(",").length > 1
-			? parsedData.planDataMod.extra.split(",")
-			: parsedData.planDataMod.extra.split(",")[0] === ""
+		planData?.extra.split(",").length && planData.extra.split(",").length > 1
+			? planData.extra.split(",")
+			: planData?.extra.split(",")[0] === ""
 				? []
-				: [parsedData.planDataMod.extra];
-	const networkRoutes = parsedData.planDataMod.networkRoute
-		? parsedData.planDataMod.networkRoute.split(",")
+				: planData?.extra
+					? [planData.extra]
+					: [];
+	const networkRoutes = planData?.networkRoute
+		? planData.networkRoute.split(",")
 		: [];
 
 	return (
 		<section className="flex gap-1 items-center flex-wrap mt-0.5">
-			{parsedData.planDataMod.bandwidth !== "" && (
+			{architectureBadge && (
+				<p className={cn("text-[9px] bg-blue-600 text-blue-200 dark:bg-blue-800 dark:text-blue-300 w-fit rounded-[5px] px-[3px] py-[1.5px]")}>
+					{architectureBadge}
+				</p>
+			)}
+			{planData?.bandwidth && (
 				<p
 					className={cn(
 						"text-[9px] bg-blue-600 dark:bg-blue-800 text-blue-200 dark:text-blue-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",
 					)}
 				>
-					{parsedData.planDataMod.bandwidth}
+					{planData?.bandwidth}
 				</p>
 			)}
-			{showTraffic && parsedData.planDataMod.trafficVol !== "" && (
+			{showTraffic && planData?.trafficVol && (
 				<p
 					className={cn(
 						"text-[9px] bg-green-600 text-green-200 dark:bg-green-800 dark:text-green-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",
 					)}
 				>
-					{parsedData.planDataMod.trafficVol}
+					{planData?.trafficVol}
 				</p>
 			)}
-			{parsedData.planDataMod.IPv4 === "1" && (
+			{planData?.IPv4 === "1" && (
 				<p
 					className={cn(
 						"text-[9px] bg-purple-600 text-purple-200 dark:bg-purple-800 dark:text-purple-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",
@@ -50,7 +60,7 @@ export default function PlanInfo({
 					IPv4
 				</p>
 			)}
-			{parsedData.planDataMod.IPv6 === "1" && (
+			{planData?.IPv6 === "1" && (
 				<p
 					className={cn(
 						"text-[9px] bg-pink-600 text-pink-200 dark:bg-pink-800 dark:text-pink-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",
@@ -59,7 +69,7 @@ export default function PlanInfo({
 					IPv6
 				</p>
 			)}
-			{parsedData.planDataMod.networkRoute && (
+			{planData?.networkRoute && (
 				<p
 					className={cn(
 						"text-[9px] bg-blue-600 text-blue-200 dark:bg-blue-800 dark:text-blue-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",

@@ -12,6 +12,7 @@ import {
 } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils";
+import { getCpuArchitectureBadge } from "@/lib/cpu-architecture";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import type { NezhaServer } from "@/types/nezha-api";
 import BillingInfo from "./billingInfo";
@@ -42,7 +43,10 @@ function ServerCard({
 		net_out_transfer,
 		public_note,
 		platform,
+		arch,
+		cpu_info,
 	} = formatNezhaInfo(now, serverInfo);
+	const architectureBadge = getCpuArchitectureBadge(arch, cpu_info);
 
 	const cardClick = () => {
 		saveMainPageScrollPosition();
@@ -231,7 +235,7 @@ function ServerCard({
 						</Badge>
 					</section>
 				)}
-				{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
+				{(parsedData?.planDataMod || architectureBadge) && <PlanInfo parsedData={parsedData} architectureBadge={architectureBadge} showTraffic={siteDisplayConfig.showTraffic} />}
 			</div>
 		</Card>
 	) : (
@@ -293,7 +297,7 @@ function ServerCard({
 			>
 				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} {...billingProps} />}
 			</div>
-			{parsedData?.planDataMod && <PlanInfo parsedData={parsedData} showTraffic={siteDisplayConfig.showTraffic} />}
+			{(parsedData?.planDataMod || architectureBadge) && <PlanInfo parsedData={parsedData} architectureBadge={architectureBadge} showTraffic={siteDisplayConfig.showTraffic} />}
 		</Card>
 	);
 }
