@@ -61,6 +61,8 @@ describe("ServerCard", () => {
 		expect(screen.getByText("serverCard.system")).toBeInTheDocument();
 		expect(screen.getAllByText("↑ 2.00 GiB")).toHaveLength(2);
 		expect(screen.getAllByText("↓ 1.00 GiB")).toHaveLength(2);
+		const metrics = screen.getByText("CPU").closest("section");
+		expect(metrics).toHaveClass("w-full", "justify-items-center");
 	});
 
 	it("allows a theme author to explicitly use the compact layout", () => {

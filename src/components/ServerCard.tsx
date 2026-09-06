@@ -79,7 +79,7 @@ function ServerCard({
 	return online ? (
 		<Card
 			className={cn(
-				"flex cursor-pointer flex-col items-center justify-start gap-3 p-3 transition-all hover:shadow-sm hover:ring-stone-300 md:px-5 dark:hover:ring-stone-700",
+				"flex cursor-pointer flex-col items-center justify-start gap-3 px-[15px] py-3 transition-all hover:shadow-sm hover:ring-stone-300 dark:hover:ring-stone-700",
 				{
 					"flex-col": fixedTopServerName,
 					"lg:flex-row": !fixedTopServerName,
@@ -132,9 +132,9 @@ function ServerCard({
 			>
 				{parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} {...billingProps} />}
 			</div>
-			<div className="flex flex-col lg:items-start items-center gap-2">
+			<div className="flex w-full flex-col items-center gap-2">
 				<section
-					className={cn("grid grid-cols-5 items-center gap-3", {
+					className={cn("grid w-full grid-cols-5 items-center justify-items-center gap-3", {
 						"lg:grid-cols-6 lg:gap-4": fixedTopServerName,
 					})}
 				>
@@ -249,7 +249,7 @@ function ServerCard({
 	) : (
 		<Card
 			className={cn(
-				"flex flex-col items-center justify-start gap-3 sm:gap-0 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors",
+				"flex flex-col items-center justify-start gap-3 px-[15px] py-3 sm:gap-0 cursor-pointer hover:bg-accent/50 transition-colors",
 				showNetTransfer
 					? "lg:min-h-[91px] min-h-[123px]"
 					: "lg:min-h-[61px] min-h-[93px]",
