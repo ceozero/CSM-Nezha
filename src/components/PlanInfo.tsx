@@ -37,7 +37,7 @@ export default function PlanInfo({
 		: "";
 
 	return (
-		<section className="flex gap-1 items-center flex-wrap mt-0.5">
+		<section className="mt-0.5 flex self-start flex-wrap items-center gap-1">
 			{architectureBadge && (
 				<p
 					className={cn(

@@ -53,7 +53,7 @@ describe("PlanInfo and BillingInfo", () => {
 	});
 
 	it("renders plan badges for every supported public note field", () => {
-		render(<PlanInfo parsedData={planData} />);
+		const { container } = render(<PlanInfo parsedData={planData} />);
 
 		expect(screen.getByText("1Gbps")).toBeInTheDocument();
 		expect(screen.getByText("2TB")).toBeInTheDocument();
@@ -64,6 +64,7 @@ describe("PlanInfo and BillingInfo", () => {
 		expect(screen.queryByText("CN2｜CMI")).not.toBeInTheDocument();
 		expect(screen.getByText("Premium")).toBeInTheDocument();
 		expect(screen.getByText("Backup")).toBeInTheDocument();
+		expect(container.firstElementChild).toHaveClass("self-start");
 	});
 
 	it("uses distinct colors for automatically detected CPU architectures", () => {
