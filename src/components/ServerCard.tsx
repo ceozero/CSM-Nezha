@@ -144,7 +144,7 @@ function ServerCard({
 								"hidden col-span-1 lg:block"
 							}
 						>
-							<div className={"flex w-14 flex-col"}>
+							<div className={"flex w-14 flex-col items-center text-center"}>
 								<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 									<img
 										alt=""
@@ -161,7 +161,7 @@ function ServerCard({
 							</div>
 						</div>
 					)}
-					<div className={"flex w-14 flex-col"}>
+					<div className={"flex w-14 flex-col items-center text-center"}>
 						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 							<Cpu aria-hidden="true" className="size-3 text-sky-500" />
 							CPU
@@ -171,7 +171,7 @@ function ServerCard({
 						</div>
 						<ServerUsageBar value={cpu} />
 					</div>
-					<div className={"flex w-14 flex-col"}>
+					<div className={"flex w-14 flex-col items-center text-center"}>
 						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 							<MemoryStick aria-hidden="true" className="size-3 text-emerald-500" />
 							{t("serverCard.mem")}
@@ -181,7 +181,7 @@ function ServerCard({
 						</div>
 						<ServerUsageBar value={mem} />
 					</div>
-					<div className={"flex w-14 flex-col"}>
+					<div className={"flex w-14 flex-col items-center text-center"}>
 						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 							<HardDrive aria-hidden="true" className="size-3 text-amber-500" />
 							{t("serverCard.stg")}
@@ -191,7 +191,7 @@ function ServerCard({
 						</div>
 						<ServerUsageBar value={stg} />
 					</div>
-					<div className={"flex w-14 flex-col"}>
+					<div className={"flex w-14 flex-col items-center text-center"}>
 						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 							<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 							{t("serverCard.upload")}
@@ -204,7 +204,7 @@ function ServerCard({
 									: `${(up * 1024).toFixed(2)}K/s`}
 						</div>
 					</div>
-					<div className={"flex w-14 flex-col"}>
+					<div className={"flex w-14 flex-col items-center text-center"}>
 						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 							<Download aria-hidden="true" className="size-3 text-violet-500" />
 							{t("serverCard.download")}

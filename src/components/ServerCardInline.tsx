@@ -110,7 +110,7 @@ function ServerCardInline({
 				<div className="flex flex-col gap-1">
 					<section className={cn("grid grid-cols-9 items-center gap-3 flex-1")}>
 						<div className={"whitespace-nowrap"}>
-							<div className={"flex w-14 flex-col"}>
+							<div className={"flex w-14 flex-col items-center text-center"}>
 								<p className="flex items-center gap-1 text-xs text-muted-foreground">
 									<img
 										alt=""
@@ -126,7 +126,7 @@ function ServerCardInline({
 								</div>
 							</div>
 						</div>
-						<div className={"flex w-20 flex-col"}>
+						<div className={"flex w-20 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Clock3 aria-hidden="true" className="size-3 text-slate-500" />
 								{t("serverCard.uptime")}
@@ -137,7 +137,7 @@ function ServerCardInline({
 									: `${Math.floor(uptime / 3600)} ${t("serverCard.hours")}`}
 							</div>
 						</div>
-						<div className={"flex w-14 flex-col"}>
+						<div className={"flex w-14 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Cpu aria-hidden="true" className="size-3 text-sky-500" />
 								CPU
@@ -147,7 +147,7 @@ function ServerCardInline({
 							</div>
 							<ServerUsageBar value={cpu} />
 						</div>
-						<div className={"flex w-14 flex-col"}>
+						<div className={"flex w-14 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<MemoryStick aria-hidden="true" className="size-3 text-emerald-500" />
 								{t("serverCard.mem")}
@@ -157,7 +157,7 @@ function ServerCardInline({
 							</div>
 							<ServerUsageBar value={mem} />
 						</div>
-						<div className={"flex w-14 flex-col"}>
+						<div className={"flex w-14 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<HardDrive aria-hidden="true" className="size-3 text-amber-500" />
 								{t("serverCard.stg")}
@@ -167,7 +167,7 @@ function ServerCardInline({
 							</div>
 							<ServerUsageBar value={stg} />
 						</div>
-						<div className={"flex w-16 flex-col"}>
+						<div className={"flex w-16 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 								{t("serverCard.upload")}
@@ -180,7 +180,7 @@ function ServerCardInline({
 										: `${(up * 1024).toFixed(2)}K/s`}
 							</div>
 						</div>
-						<div className={"flex w-16 flex-col"}>
+						<div className={"flex w-16 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Download aria-hidden="true" className="size-3 text-violet-500" />
 								{t("serverCard.download")}
@@ -193,7 +193,7 @@ function ServerCardInline({
 										: `${(down * 1024).toFixed(2)}K/s`}
 							</div>
 						</div>
-						<div className={"flex w-20 flex-col"}>
+						<div className={"flex w-20 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 								{t("serverCard.totalUpload")}
@@ -202,7 +202,7 @@ function ServerCardInline({
 								{formatBytes(net_out_transfer)}
 							</div>
 						</div>
-						<div className={"flex w-20 flex-col"}>
+						<div className={"flex w-20 flex-col items-center text-center"}>
 							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
 								<Download aria-hidden="true" className="size-3 text-violet-500" />
 								{t("serverCard.totalDownload")}
