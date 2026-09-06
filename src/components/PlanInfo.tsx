@@ -85,15 +85,18 @@ export default function PlanInfo({
 				</p>
 			)}
 			{planData?.networkRoute && (
-				<p
-					className={cn(
-						"text-[9px] bg-blue-600 text-blue-200 dark:bg-blue-800 dark:text-blue-300  w-fit rounded-[5px] px-[3px] py-[1.5px]",
-					)}
-				>
-					{networkRoutes.map((route, index) => {
-						return route + (index === networkRoutes.length - 1 ? "" : "｜");
-					})}
-				</p>
+				<>
+					{networkRoutes.map((route, index) => (
+						<p
+							key={`${route}-${index}`}
+							className={cn(
+								"text-[9px] bg-blue-600 text-blue-200 dark:bg-blue-800 dark:text-blue-300 w-fit rounded-[5px] px-[3px] py-[1.5px]",
+							)}
+						>
+							{route}
+						</p>
+					))}
+				</>
 			)}
 			{extraList.map((extra, index) => {
 				return (

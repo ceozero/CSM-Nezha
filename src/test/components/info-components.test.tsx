@@ -59,7 +59,9 @@ describe("PlanInfo and BillingInfo", () => {
 		expect(screen.getByText("2TB")).toBeInTheDocument();
 		expect(screen.getByText("IPv4")).toBeInTheDocument();
 		expect(screen.getByText("IPv6")).toBeInTheDocument();
-		expect(screen.getByText("CN2｜CMI")).toBeInTheDocument();
+		expect(screen.getByText("CN2")).toBeInTheDocument();
+		expect(screen.getByText("CMI")).toBeInTheDocument();
+		expect(screen.queryByText("CN2｜CMI")).not.toBeInTheDocument();
 		expect(screen.getByText("Premium")).toBeInTheDocument();
 		expect(screen.getByText("Backup")).toBeInTheDocument();
 	});
