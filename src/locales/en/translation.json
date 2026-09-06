@@ -5,6 +5,7 @@
 	"login": "Login",
 	"online": "Online",
 	"offline": "Offline",
+	"realtimeConnection": "Live connection",
 	"whereTheTimeIs": "Where the time is",
 	"refreshing": "Refreshing",
 	"info": {

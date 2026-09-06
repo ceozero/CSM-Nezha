@@ -14,8 +14,7 @@ import { cn } from "@/lib/utils";
 
 import AnimateCountClient from "./AnimatedCount";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { Loader, LoadingSpinner } from "./loading/Loader";
-import NumericText from "./NumericText";
+import { LoadingSpinner } from "./loading/Loader";
 import { SearchButton } from "./SearchButton";
 import { Button } from "./ui/button";
 
@@ -61,9 +60,7 @@ function Header() {
 		retry: false,
 	});
 
-	const { lastData, connected } = useWebSocketContext();
-
-	const onlineCount = connected ? (lastData ? lastData.online || 0 : 0) : "...";
+	const { connected } = useWebSocketContext();
 
 	const siteName = settingData?.data?.config?.site_name;
 
@@ -168,14 +165,7 @@ function Header() {
 							},
 						)}
 					>
-						{connected ? (
-							<NumericText value={onlineCount} />
-						) : (
-							<Loader visible={true} />
-						)}
-						<p className="text-muted-foreground">
-							{connected ? t("online") : t("offline")}
-						</p>
+						<p className="text-muted-foreground">{t("realtimeConnection", "实时连接")}</p>
 						<span
 							className={cn("h-2 w-2 rounded-full bg-green-500", {
 								"bg-red-500": !connected,

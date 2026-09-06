@@ -116,7 +116,7 @@ describe("Header", () => {
 		headerMocks.fetchLoginUser.mockRejectedValue(new Error("anonymous"));
 	});
 
-	it("renders configured site identity, custom links, online count, and dashboard state", async () => {
+	it("renders configured site identity, custom links, connection state, and dashboard state", async () => {
 		const user = userEvent.setup();
 		Object.assign(window, {
 			CustomLinks: JSON.stringify([
@@ -137,8 +137,8 @@ describe("Header", () => {
 		);
 		expect(screen.getAllByRole("link", { name: "Docs" })).toHaveLength(2);
 		expect(await screen.findAllByText("dashboard")).toHaveLength(2);
-		expect(screen.getByText("online").closest("button")).toHaveTextContent("4");
-		expect(screen.getByText("online")).toBeInTheDocument();
+		expect(screen.getByText("realtimeConnection").closest("button")).not.toHaveTextContent("4");
+		expect(screen.getByText("realtimeConnection")).toBeInTheDocument();
 
 		await waitFor(() => {
 			expect(document.title).toBe("Status Hub");
@@ -154,16 +154,14 @@ describe("Header", () => {
 		expect(screen.getByText("/")).toBeInTheDocument();
 	});
 
-	it("uses the offline display and login links when websocket and auth are unavailable", async () => {
+	it("uses the disconnected indicator and login links when websocket and auth are unavailable", async () => {
 		headerMocks.connected = false;
 
 		const { container } = renderHeader();
 
 		expect(await screen.findAllByText("login")).toHaveLength(2);
-		expect(screen.getByText("offline")).toBeInTheDocument();
-		expect(
-			container.querySelector("[data-visible='true']"),
-		).toBeInTheDocument();
+		expect(screen.getByText("realtimeConnection")).toBeInTheDocument();
+		expect(container.querySelector(".bg-red-500")).toBeInTheDocument();
 	});
 
 	it("ignores invalid custom links instead of crashing", async () => {
