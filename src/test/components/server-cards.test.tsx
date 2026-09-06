@@ -63,7 +63,7 @@ describe("ServerCard", () => {
 		expect(screen.getAllByText("↓ 1.00 GiB")).toHaveLength(2);
 		const metrics = screen.getByText("CPU").closest("section");
 		expect(metrics).toHaveClass("w-full", "justify-items-center");
-		expect(screen.getByAltText("Debian 系统图标")).toBeInTheDocument();
+		expect(screen.getByRole("img", { name: "Debian 系统图标" })).toBeInTheDocument();
 		expect(screen.getByText("serverCard.system").parentElement?.parentElement).toHaveClass("lg:justify-center");
 	});
 
