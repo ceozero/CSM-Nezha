@@ -1,6 +1,12 @@
 import type { SVGProps } from "react";
 
+/** 将后端可能附带版本号的系统字符串归一化为系统标识。 */
+function normalizePlatform(platform: string): string {
+	return platform.trim().toLowerCase();
+}
+
 export function GetFontLogoClass(platform: string): string {
+	platform = normalizePlatform(platform);
 	if (
 		[
 			"almalinux",
@@ -68,6 +74,37 @@ export function GetFontLogoClass(platform: string): string {
 }
 
 export function GetOsName(platform: string): string {
+	platform = normalizePlatform(platform);
+	if (platform.includes("windows")) {
+		return "Windows";
+	}
+	if (platform.includes("ubuntu")) {
+		return "Ubuntu";
+	}
+	if (platform.includes("debian")) {
+		return "Debian";
+	}
+	if (platform.includes("centos")) {
+		return "CentOS";
+	}
+	if (platform.includes("rocky")) {
+		return "Rocky Linux";
+	}
+	if (platform.includes("alma")) {
+		return "AlmaLinux";
+	}
+	if (platform.includes("red hat") || platform.includes("redhat") || platform === "rhel") {
+		return "Red Hat";
+	}
+	if (platform.includes("fedora")) {
+		return "Fedora";
+	}
+	if (platform.includes("arch")) {
+		return "Archlinux";
+	}
+	if (platform.includes("alpine")) {
+		return "Alpine Linux";
+	}
 	if (
 		[
 			"almalinux",
@@ -128,6 +165,29 @@ export function GetOsName(platform: string): string {
 		return "Opensuse";
 	}
 	return "Linux";
+}
+
+/**
+ * Simple Icons 的图标名。CFSM 的 os 字段可能是 “Ubuntu 24.04” 之类的完整字符串，
+ * 因此这里以包含关系匹配发行版，未知系统则回退为通用 Linux 图标。
+ */
+export function getOsIconSlug(platform: string): string {
+	const normalized = normalizePlatform(platform);
+	if (normalized.includes("windows")) return "windows";
+	if (normalized.includes("ubuntu")) return "ubuntu";
+	if (normalized.includes("debian")) return "debian";
+	if (normalized.includes("centos")) return "centos";
+	if (normalized.includes("rocky")) return "rockylinux";
+	if (normalized.includes("alma")) return "almalinux";
+	if (normalized.includes("red hat") || normalized.includes("redhat") || normalized === "rhel") return "redhat";
+	if (normalized.includes("fedora")) return "fedora";
+	if (normalized.includes("arch")) return "archlinux";
+	if (normalized.includes("alpine")) return "alpinelinux";
+	if (normalized.includes("opensuse")) return "opensuse";
+	if (normalized.includes("freebsd")) return "freebsd";
+	if (normalized.includes("openbsd")) return "openbsd";
+	if (normalized.includes("darwin") || normalized.includes("macos")) return "apple";
+	return "linux";
 }
 
 export function MageMicrosoftWindows(props: SVGProps<SVGSVGElement>) {

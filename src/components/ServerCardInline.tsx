@@ -1,10 +1,11 @@
 import { memo } from "react";
-import { Clock3, Cpu, Download, HardDrive, MemoryStick, MonitorCog, Upload } from "lucide-react";
+import { Clock3, Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
 import ServerNetworkLatency from "@/components/ServerNetworkLatency";
 import ServerUsageBar from "@/components/ServerUsageBar";
+import OperatingSystemIcon from "@/components/OperatingSystemIcon";
 import { formatBytes } from "@/lib/format";
 import { GetOsName } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
@@ -109,13 +110,11 @@ function ServerCardInline({
 						<div className={"whitespace-nowrap"}>
 							<div className={"flex w-14 flex-col items-center text-center"}>
 								<p className="flex w-full items-center justify-center gap-1 text-xs text-muted-foreground">
-									<MonitorCog aria-hidden="true" className="size-3 text-rose-500" />
+									<OperatingSystemIcon platform={platform} />
 									{t("serverCard.system")}
 								</p>
 								<div className="flex w-full items-center justify-center text-[10.5px] font-semibold">
-									{platform.includes("Windows")
-										? "Windows"
-										: GetOsName(platform)}
+									{GetOsName(platform)}
 								</div>
 							</div>
 						</div>

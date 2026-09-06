@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
 	GetFontLogoClass,
 	GetOsName,
+	getOsIconSlug,
 	MageMicrosoftWindows,
 } from "@/lib/logo-class";
 
@@ -25,7 +26,14 @@ describe("logo-class helpers", () => {
 		expect(GetOsName("amazon")).toBe("Redhat");
 		expect(GetOsName("arch")).toBe("Archlinux");
 		expect(GetOsName("opensuse-tumbleweed")).toBe("Opensuse");
-		expect(GetOsName("unknown")).toBe("Linux");
+		 expect(GetOsName("unknown")).toBe("Linux");
+	});
+
+	it("recognizes distribution names when the backend includes a version", () => {
+		expect(GetOsName("Ubuntu 24.04 LTS")).toBe("Ubuntu");
+		expect(GetOsName("Windows Server 2025")).toBe("Windows");
+		expect(getOsIconSlug("Debian GNU/Linux 12")).toBe("debian");
+		expect(getOsIconSlug("CentOS Stream 9")).toBe("centos");
 	});
 
 	it("renders the Windows SVG icon", () => {
