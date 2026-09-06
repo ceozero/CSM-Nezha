@@ -172,6 +172,7 @@
 		"reload": "更新"
 	},
 	"billingInfo": {
+		"onlineDays": "在线 {{days}} 天",
 		"remaining": "剩余天数",
 		"error": "计算错误",
 		"indefinite": "永久",

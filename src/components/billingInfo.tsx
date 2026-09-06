@@ -11,10 +11,13 @@ export default function BillingInfo({
 	parsedData,
 	showPrice = true,
 	showExpire = true,
+	onlineDays,
 }: {
 	parsedData: PublicNoteData;
 	showPrice?: boolean;
 	showExpire?: boolean;
+	/** 服务器当前连续在线（Agent uptime）天数；离线卡片不显示。 */
+	onlineDays?: number;
 }) {
 	const { t } = useTranslation();
 	if (!parsedData?.billingDataMod) {
@@ -70,6 +73,11 @@ export default function BillingInfo({
 
 	return daysLeftObject.days >= 0 ? (
 		<>
+			{onlineDays !== undefined && (
+				<p className={cn("text-[10px] text-muted-foreground")}>
+					{t("billingInfo.onlineDays", { days: onlineDays, defaultValue: `在线 ${onlineDays} 天` })}
+				</p>
+			)}
 			{priceInfo}
 			{showExpire && (hasExpiryDate || isFree) && (
 				<div className={cn("text-[10px] text-muted-foreground")}>
@@ -88,6 +96,11 @@ export default function BillingInfo({
 		</>
 	) : (
 		<>
+			{onlineDays !== undefined && (
+				<p className={cn("text-[10px] text-muted-foreground")}>
+					{t("billingInfo.onlineDays", { days: onlineDays, defaultValue: `在线 ${onlineDays} 天` })}
+				</p>
+			)}
 			{priceInfo}
 			{showExpire && <p className={cn("text-[10px] text-muted-foreground text-red-600")}>
 				{t("billingInfo.expired")}: {daysLeftObject.days * -1}{" "}

@@ -146,6 +146,7 @@
 		"reload": "Update"
 	},
 	"billingInfo": {
+		"onlineDays": "Online {{days}} days",
 		"remaining": "Remaining",
 		"error": "error",
 		"indefinite": "Indefinite",

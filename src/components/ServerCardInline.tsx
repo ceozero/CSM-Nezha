@@ -64,6 +64,7 @@ function ServerCardInline({
 	const billingProps = {
 		showPrice: siteDisplayConfig.showPrice,
 		showExpire: siteDisplayConfig.showExpire,
+		onlineDays: online ? Math.floor(Math.max(0, uptime) / 86_400) : undefined,
 	};
 
 	return online ? (

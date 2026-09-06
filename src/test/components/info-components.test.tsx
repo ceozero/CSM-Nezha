@@ -181,6 +181,28 @@ describe("PlanInfo and BillingInfo", () => {
 		);
 		expect(screen.getByText(/billingInfo.expired/)).toBeInTheDocument();
 	});
+
+	it("renders server uptime days before the billing information", () => {
+		render(
+			<BillingInfo
+				onlineDays={12}
+				parsedData={{
+					billingDataMod: {
+						startDate: "2025-01-01",
+						endDate: "2025-01-31",
+						autoRenewal: "0",
+						cycle: "year",
+						amount: "100",
+						currency: "¥",
+					},
+				}}
+			/>,
+		);
+
+		const onlineDays = screen.getByText("billingInfo.onlineDays");
+		const price = screen.getByText("billingInfo.price: ¥100/year");
+		expect(onlineDays.compareDocumentPosition(price)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+	});
 });
 
 describe("MapTooltip", () => {

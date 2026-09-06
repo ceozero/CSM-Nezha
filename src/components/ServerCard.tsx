@@ -45,6 +45,7 @@ function ServerCard({
 		platform,
 		arch,
 		cpu_info,
+		uptime,
 	} = formatNezhaInfo(now, serverInfo);
 	const architectureBadge = getCpuArchitectureBadge(arch, cpu_info);
 
@@ -71,6 +72,7 @@ function ServerCard({
 	const billingProps = {
 		showPrice: siteDisplayConfig.showPrice,
 		showExpire: siteDisplayConfig.showExpire,
+		onlineDays: online ? Math.floor(Math.max(0, uptime) / 86_400) : undefined,
 	};
 
 	return online ? (
