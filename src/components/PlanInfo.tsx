@@ -1,5 +1,12 @@
 import { cn, type PublicNoteData } from "@/lib/utils";
 
+const architectureBadgeColor: Record<string, string> = {
+	ARM64: "bg-emerald-600 text-emerald-100 dark:bg-emerald-800 dark:text-emerald-200",
+	AMD64: "bg-rose-600 text-rose-100 dark:bg-rose-800 dark:text-rose-200",
+	"Intel x86_64": "bg-sky-600 text-sky-100 dark:bg-sky-800 dark:text-sky-200",
+	x86_64: "bg-stone-600 text-stone-100 dark:bg-stone-800 dark:text-stone-200",
+};
+
 export default function PlanInfo({
 	parsedData,
 	architectureBadge,
@@ -25,11 +32,19 @@ export default function PlanInfo({
 	const networkRoutes = planData?.networkRoute
 		? planData.networkRoute.split(",")
 		: [];
+	const badgeColor = architectureBadge
+		? architectureBadgeColor[architectureBadge] || architectureBadgeColor.x86_64
+		: "";
 
 	return (
 		<section className="flex gap-1 items-center flex-wrap mt-0.5">
 			{architectureBadge && (
-				<p className={cn("text-[9px] bg-blue-600 text-blue-200 dark:bg-blue-800 dark:text-blue-300 w-fit rounded-[5px] px-[3px] py-[1.5px]")}>
+				<p
+					className={cn(
+						"text-[9px] w-fit rounded-[5px] px-[3px] py-[1.5px]",
+						badgeColor,
+					)}
+				>
 					{architectureBadge}
 				</p>
 			)}

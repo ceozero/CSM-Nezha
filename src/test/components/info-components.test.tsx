@@ -64,6 +64,20 @@ describe("PlanInfo and BillingInfo", () => {
 		expect(screen.getByText("Backup")).toBeInTheDocument();
 	});
 
+	it("uses distinct colors for automatically detected CPU architectures", () => {
+		const { rerender } = render(<PlanInfo architectureBadge="ARM64" />);
+		expect(screen.getByText("ARM64")).toHaveClass("bg-emerald-600");
+
+		rerender(<PlanInfo architectureBadge="AMD64" />);
+		expect(screen.getByText("AMD64")).toHaveClass("bg-rose-600");
+
+		rerender(<PlanInfo architectureBadge="Intel x86_64" />);
+		expect(screen.getByText("Intel x86_64")).toHaveClass("bg-sky-600");
+
+		rerender(<PlanInfo architectureBadge="x86_64" />);
+		expect(screen.getByText("x86_64")).toHaveClass("bg-stone-600");
+	});
+
 	it("renders active, free, usage-based, indefinite, and expired billing states", () => {
 		const { rerender } = render(
 			<BillingInfo
