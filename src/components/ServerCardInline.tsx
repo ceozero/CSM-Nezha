@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
@@ -108,18 +109,14 @@ function ServerCardInline({
 				<Separator orientation="vertical" className="h-8 mx-0 ml-2" />
 				<div className="flex flex-col gap-1">
 					<section className={cn("grid grid-cols-9 items-center gap-3 flex-1")}>
-						<div
-							className={"items-center flex flex-row gap-2 whitespace-nowrap"}
-						>
-							<div className="text-xs font-semibold">
-								<img
-									alt=""
-									className="size-[10px] object-contain"
-									src={getCfsmOsIcon(platform)}
-								/>
-							</div>
+						<div className={"whitespace-nowrap"}>
 							<div className={"flex w-14 flex-col"}>
-								<p className="text-xs text-muted-foreground">
+								<p className="flex items-center gap-1 text-xs text-muted-foreground">
+									<img
+										alt=""
+										className="size-[10px] object-contain"
+										src={getCfsmOsIcon(platform)}
+									/>
 									{t("serverCard.system")}
 								</p>
 								<div className="flex items-center text-[10.5px] font-semibold">
@@ -140,14 +137,18 @@ function ServerCardInline({
 							</div>
 						</div>
 						<div className={"flex w-14 flex-col"}>
-							<p className="text-xs text-muted-foreground">{"CPU"}</p>
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Cpu aria-hidden="true" className="size-3 text-sky-500" />
+								CPU
+							</p>
 							<div className="flex items-center text-xs font-semibold">
 								{cpu.toFixed(2)}%
 							</div>
 							<ServerUsageBar value={cpu} />
 						</div>
 						<div className={"flex w-14 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<MemoryStick aria-hidden="true" className="size-3 text-emerald-500" />
 								{t("serverCard.mem")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">
@@ -156,7 +157,8 @@ function ServerCardInline({
 							<ServerUsageBar value={mem} />
 						</div>
 						<div className={"flex w-14 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<HardDrive aria-hidden="true" className="size-3 text-amber-500" />
 								{t("serverCard.stg")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">
@@ -165,7 +167,8 @@ function ServerCardInline({
 							<ServerUsageBar value={stg} />
 						</div>
 						<div className={"flex w-16 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 								{t("serverCard.upload")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">
@@ -177,7 +180,8 @@ function ServerCardInline({
 							</div>
 						</div>
 						<div className={"flex w-16 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Download aria-hidden="true" className="size-3 text-violet-500" />
 								{t("serverCard.download")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">

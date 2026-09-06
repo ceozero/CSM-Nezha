@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
@@ -140,18 +141,16 @@ function ServerCard({
 					{fixedTopServerName && (
 						<div
 							className={
-								"hidden col-span-1 items-center lg:flex lg:flex-row gap-2"
+								"hidden col-span-1 lg:block"
 							}
 						>
-							<div className="text-xs font-semibold">
-								<img
-									alt=""
-									className="size-[10px] object-contain"
-									src={getCfsmOsIcon(platform)}
-								/>
-							</div>
 							<div className={"flex w-14 flex-col"}>
-								<p className="text-xs text-muted-foreground">
+								<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+									<img
+										alt=""
+										className="size-[10px] object-contain"
+										src={getCfsmOsIcon(platform)}
+									/>
 									{t("serverCard.system")}
 								</p>
 								<div className="flex items-center text-[10.5px] font-semibold">
@@ -163,14 +162,18 @@ function ServerCard({
 						</div>
 					)}
 					<div className={"flex w-14 flex-col"}>
-						<p className="text-xs text-muted-foreground">{"CPU"}</p>
+						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+							<Cpu aria-hidden="true" className="size-3 text-sky-500" />
+							CPU
+						</p>
 						<div className="flex items-center text-xs font-semibold">
 							{cpu.toFixed(2)}%
 						</div>
 						<ServerUsageBar value={cpu} />
 					</div>
 					<div className={"flex w-14 flex-col"}>
-						<p className="text-xs text-muted-foreground">
+						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+							<MemoryStick aria-hidden="true" className="size-3 text-emerald-500" />
 							{t("serverCard.mem")}
 						</p>
 						<div className="flex items-center text-xs font-semibold">
@@ -179,7 +182,8 @@ function ServerCard({
 						<ServerUsageBar value={mem} />
 					</div>
 					<div className={"flex w-14 flex-col"}>
-						<p className="text-xs text-muted-foreground">
+						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+							<HardDrive aria-hidden="true" className="size-3 text-amber-500" />
 							{t("serverCard.stg")}
 						</p>
 						<div className="flex items-center text-xs font-semibold">
@@ -188,7 +192,8 @@ function ServerCard({
 						<ServerUsageBar value={stg} />
 					</div>
 					<div className={"flex w-14 flex-col"}>
-						<p className="text-xs text-muted-foreground">
+						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+							<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 							{t("serverCard.upload")}
 						</p>
 						<div className="flex items-center text-xs font-semibold">
@@ -200,7 +205,8 @@ function ServerCard({
 						</div>
 					</div>
 					<div className={"flex w-14 flex-col"}>
-						<p className="text-xs text-muted-foreground">
+						<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+							<Download aria-hidden="true" className="size-3 text-violet-500" />
 							{t("serverCard.download")}
 						</p>
 						<div className="flex items-center text-xs font-semibold">
