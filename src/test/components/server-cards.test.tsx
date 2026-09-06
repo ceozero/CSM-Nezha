@@ -1,8 +1,9 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ServerCard from "@/components/ServerCard";
 import ServerCardInline from "@/components/ServerCardInline";
+import ServerNetworkLatency from "@/components/ServerNetworkLatency";
 import { createServer } from "@/test/fixtures";
 import { renderWithProviders } from "@/test/utils";
 
@@ -147,6 +148,18 @@ describe("ServerCard", () => {
 		expect(screen.getByText("丢 3%")).toHaveClass("text-orange-500");
 		expect(screen.getByText("丢 1%")).toHaveClass("text-amber-500");
 		expect(screen.getByText("丢 0%")).toHaveClass("text-emerald-600");
+	});
+
+	it("uses customized Ping node names when supplied by the backend", () => {
+		render(
+			<ServerNetworkLatency
+				labels={{ ct: "电信 163", cu: "联通 9929", cm: "移动 CMI", bd: "国际 BGP" }}
+				latency={{ ct: { delay: 125, loss: 0 }, bd: { delay: 51, loss: 0 } }}
+			/>,
+		);
+
+		expect(screen.getByText("电信 163")).toBeInTheDocument();
+		expect(screen.getByText("国际 BGP")).toBeInTheDocument();
 	});
 
 	it("uses the left transfer box for the monthly quota and the right one for total traffic", () => {

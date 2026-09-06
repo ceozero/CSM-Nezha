@@ -62,6 +62,7 @@ export default function ServerDetail() {
 						peakCutEnabled={peakCutEnabled}
 						onPeakCutChange={setPeakCutEnabled}
 						showToolbar={false}
+						latencyLabels={siteDisplayConfig.latencyLabels}
 					/>
 				</Suspense>
 			)}

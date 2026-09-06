@@ -148,6 +148,9 @@ function WebSocketProbe() {
 			<p data-testid="display-config">
 				{`${siteDisplayConfig.showPrice}:${siteDisplayConfig.showExpire}:${siteDisplayConfig.showTraffic}:${siteDisplayConfig.showThreeNetDetails}`}
 			</p>
+			<p data-testid="latency-labels">
+				{`${siteDisplayConfig.latencyLabels.ct}:${siteDisplayConfig.latencyLabels.cu}:${siteDisplayConfig.latencyLabels.cm}:${siteDisplayConfig.latencyLabels.bd}`}
+			</p>
 			<p data-testid="history-server-count">
 				{messageHistory.reduce((total, item) => total + item.servers.length, 0)}
 			</p>
@@ -333,6 +336,24 @@ describe("WebSocketProvider", () => {
 		await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
 		expect(FakeWebSocket.instances[0].url).toBe(
 			"wss://localhost/api/ws?subscribe=all&token=private-jwt",
+		);
+	});
+
+	it("使用后台配置的 Ping 节点显示名称", async () => {
+		cfsmMocks.getConfig.mockResolvedValue({
+			frontend_ws_timeout_minutes: 0,
+			custom_ct_name: "电信 163",
+			custom_cu_name: "联通 9929",
+			custom_cm_name: "移动 CMI",
+			custom_bd_name: "国际 BGP",
+		});
+
+		renderWebSocketProvider(<WebSocketProbe />);
+
+		await vi.waitFor(() =>
+			expect(screen.getByTestId("latency-labels")).toHaveTextContent(
+				"电信 163:联通 9929:移动 CMI:国际 BGP",
+			),
 		);
 	});
 

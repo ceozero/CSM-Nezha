@@ -95,6 +95,28 @@ describe("Nezha 视图兼容 API", () => {
 		]));
 	});
 
+	it("使用后台自定义的 Ping 节点名称生成图表图例", async () => {
+		apiMocks.getServers.mockResolvedValue({
+			servers: [{
+				...server,
+				ping: [{ ts: 1000, ct: 21, bd: 35 }],
+				loss: [{ ts: 1000, ct: 0, bd: 2 }],
+			}],
+		});
+
+		const monitor = await fetchMonitor("node-1", "realtime", {
+			ct: "电信 163",
+			cu: "联通 9929",
+			cm: "移动 CMI",
+			bd: "国际 BGP",
+		});
+
+		expect(monitor.data).toEqual(expect.arrayContaining([
+			expect.objectContaining({ monitor_name: "电信 163" }),
+			expect.objectContaining({ monitor_name: "国际 BGP" }),
+		]));
+	});
+
 	it("历史网络数据按所选时间段请求，3 天仅保留最近 72 小时", async () => {
 		const now = Date.parse("2025-01-10T00:00:00.000Z");
 		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(now);

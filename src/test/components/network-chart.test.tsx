@@ -164,7 +164,9 @@ describe("NetworkChart", () => {
 		renderWithQuery(<NetworkChart server_id="7" show={true} />);
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
-		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "realtime");
+		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "realtime", {
+			ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+		});
 		expect(screen.getByText("2 monitor.monitorCount")).toBeInTheDocument();
 		expect(screen.getByText("Alpha")).toBeInTheDocument();
 		expect(screen.getByText("Beta")).toBeInTheDocument();
@@ -176,7 +178,9 @@ describe("NetworkChart", () => {
 		await user.click(screen.getByText("monitor.period7d"));
 
 		await waitFor(() => {
-			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "7d");
+			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "7d", {
+				ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+			});
 		});
 	});
 
@@ -196,7 +200,9 @@ describe("NetworkChart", () => {
 		);
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
-		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d");
+		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d", {
+			ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+		});
 		expect(screen.queryByText("monitor.period1d")).not.toBeInTheDocument();
 		expect(screen.queryByRole("switch")).not.toBeInTheDocument();
 	});

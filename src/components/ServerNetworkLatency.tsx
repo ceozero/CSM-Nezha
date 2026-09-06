@@ -1,11 +1,15 @@
 import { cn } from "@/lib/utils";
 import type { NezhaNetworkLatency } from "@/types/nezha-api";
+import {
+	defaultLatencyLabels,
+	type LatencyLabels,
+} from "@/context/websocket-context";
 
 const ROUTES = [
-	{ key: "ct", label: "电信" },
-	{ key: "cu", label: "联通" },
-	{ key: "cm", label: "移动" },
-	{ key: "bd", label: "BGP" },
+	{ key: "ct" },
+	{ key: "cu" },
+	{ key: "cm" },
+	{ key: "bd" },
 ] as const;
 
 function latencyTone(delay: number, loss?: number) {
@@ -25,14 +29,16 @@ function lossTone(loss: number) {
 /** 在首页卡片展示 CFSM 当前采样的线路延迟，不额外请求历史数据。 */
 export default function ServerNetworkLatency({
 	latency,
+	labels = defaultLatencyLabels,
 	className,
 }: {
 	latency?: NezhaNetworkLatency;
+	labels?: LatencyLabels;
 	className?: string;
 }) {
 	const routes = ROUTES.flatMap((route) => {
 		const probe = latency?.[route.key];
-		return probe ? [{ ...route, ...probe }] : [];
+		return probe ? [{ ...route, label: labels[route.key], ...probe }] : [];
 	});
 
 	if (routes.length === 0) return null;

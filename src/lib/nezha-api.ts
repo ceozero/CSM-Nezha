@@ -4,6 +4,10 @@
  */
 import { getConfig, getHistory, getServers } from "@/cfsm/api";
 import type { CfsmLatencyPoint, HistoryRow } from "@/cfsm/types";
+import {
+	defaultLatencyLabels,
+	type LatencyLabels,
+} from "@/context/websocket-context";
 import { toMetricPoints, toServerGroups } from "@/cfsm/nezha-bridge";
 import type {
 	LoginUserResponse,
@@ -72,13 +76,7 @@ export const fetchLoginUser = async (): Promise<LoginUserResponse> => {
 	};
 };
 
-const LATENCY_ROUTES = [
-	["ct", "电信"],
-	["cu", "联通"],
-	["cm", "移动"],
-	// CFSM 的第四条探测线路字段固定为 bd；主题按当前站点约定展示为 BGP。
-	["bd", "BGP"],
-] as const;
+const LATENCY_ROUTE_KEYS = ["ct", "cu", "cm", "bd"] as const;
 
 function numberAt(point: object | undefined, key: string) {
 	const value = point && (point as Record<string, unknown>)[key];
@@ -94,14 +92,15 @@ function toMonitorResponse(
 	serverName: string,
 	ping: CfsmLatencyPoint[],
 	loss: CfsmLatencyPoint[],
+	labels: LatencyLabels,
 ): MonitorResponse {
 	const lossByTimestamp = new Map(loss.map((point) => [Number(point.ts), point]));
-	const data = LATENCY_ROUTES.flatMap(([key, monitor_name], index) => {
+	const data = LATENCY_ROUTE_KEYS.flatMap((key, index) => {
 		// CFSM 以 false/null 表示该线路未启用，不能误画成 0ms 曲线。
 		if (!ping.some((point) => typeof point[key] === "number")) return [];
 		return [{
 			monitor_id: index + 1,
-			monitor_name,
+			monitor_name: labels[key],
 			display_index: index + 1,
 			server_id: serverId,
 			server_name: serverName,
@@ -123,6 +122,7 @@ function toMonitorResponse(
 export const fetchMonitor = async (
 	serverId: string,
 	period: MonitorPeriod = "realtime",
+	labels: LatencyLabels = defaultLatencyLabels,
 ): Promise<MonitorResponse> => {
 	const { servers } = await getServers();
 	const server = servers.find((item) => item.id === serverId);
@@ -134,6 +134,7 @@ export const fetchMonitor = async (
 			server.name,
 			Array.isArray(server.ping) ? server.ping : [],
 			Array.isArray(server.loss) ? server.loss : [],
+			labels,
 		);
 	}
 
@@ -156,7 +157,7 @@ export const fetchMonitor = async (
 		bd: row.loss_bd,
 	}));
 
-	return toMonitorResponse(server.id, server.name, ping, loss);
+	return toMonitorResponse(server.id, server.name, ping, loss, labels);
 };
 
 export const fetchService = async (): Promise<ServiceResponse> => ({

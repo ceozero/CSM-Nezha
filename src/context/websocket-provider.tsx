@@ -7,6 +7,7 @@ import type { CfsmServer, ServersResponse } from "@/cfsm/types";
 import type { NezhaWebsocketResponse } from "@/types/nezha-api";
 import {
 	WebSocketContext,
+	defaultLatencyLabels,
 	defaultSiteDisplayConfig,
 	type SiteDisplayConfig,
 	type WebSocketContextType,
@@ -31,15 +32,31 @@ function enabled(value: unknown) {
 	return value === undefined || value === null || value === true || value === "true" || value === "1";
 }
 
-function toSiteDisplayConfig(response: ServersResponse): SiteDisplayConfig {
-	const config = response.sysConfig;
-	if (!config) return defaultSiteDisplayConfig;
+function labelOrDefault(value: unknown, fallback: string) {
+	return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function toSiteDisplayConfig(response: ServersResponse, cfsmConfig?: Awaited<ReturnType<typeof getConfig>>): SiteDisplayConfig {
+	const sysConfig = response.sysConfig;
+	const labels = {
+		ct: labelOrDefault(cfsmConfig?.custom_ct_name, defaultLatencyLabels.ct),
+		cu: labelOrDefault(cfsmConfig?.custom_cu_name, defaultLatencyLabels.cu),
+		cm: labelOrDefault(cfsmConfig?.custom_cm_name, defaultLatencyLabels.cm),
+		bd: labelOrDefault(cfsmConfig?.custom_bd_name, defaultLatencyLabels.bd),
+	};
+	if (!sysConfig) {
+		return {
+			...defaultSiteDisplayConfig,
+			latencyLabels: labels,
+		};
+	}
 	return {
-		showPrice: enabled(config.show_price),
-		showExpire: enabled(config.show_expire),
-		showTraffic: enabled(config.show_tf),
-		showThreeNetDetails: enabled(config.show_three_net_details),
-		displayMode: config.display_mode,
+		showPrice: enabled(sysConfig.show_price),
+		showExpire: enabled(sysConfig.show_expire),
+		showTraffic: enabled(sysConfig.show_tf),
+		showThreeNetDetails: enabled(sysConfig.show_three_net_details),
+		displayMode: sysConfig.display_mode,
+		latencyLabels: labels,
 	};
 }
 
@@ -98,7 +115,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 	const refresh = useCallback(async () => {
 		const [serversResponse, config] = await Promise.all([getServers(), getConfig()]);
 		rawServersRef.current = serversResponse.servers;
-		setSiteDisplayConfig(toSiteDisplayConfig(serversResponse));
+		setSiteDisplayConfig(toSiteDisplayConfig(serversResponse, config));
 		timeoutMinutesRef.current = Number(config.frontend_ws_timeout_minutes) || 0;
 		publish(rawServersRef.current);
 	}, [publish]);

@@ -29,6 +29,10 @@ import {
 } from "@/components/ui/chart";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { hasAdminToken } from "@/cfsm/api";
+import {
+	defaultLatencyLabels,
+	type LatencyLabels,
+} from "@/context/websocket-context";
 import { useActiveIndicator } from "@/hooks/use-active-indicator";
 import {
 	fetchMonitor,
@@ -122,6 +126,7 @@ export function NetworkChart({
 	peakCutEnabled: controlledPeakCutEnabled,
 	onPeakCutChange,
 	showToolbar = true,
+	latencyLabels = defaultLatencyLabels,
 }: {
 	server_id: string;
 	show: boolean;
@@ -131,6 +136,7 @@ export function NetworkChart({
 	onPeakCutChange?: (enabled: boolean) => void;
 	/** 独立使用时显示完整工具栏，详情页复用顶部时间范围时隐藏。 */
 	showToolbar?: boolean;
+	latencyLabels?: LatencyLabels;
 }) {
 	const { t } = useTranslation();
 	const [localPeriod, setLocalPeriod] = React.useState<MonitorPeriod>("realtime");
@@ -143,8 +149,8 @@ export function NetworkChart({
 	};
 
 	const { data: monitorData, isPlaceholderData } = useQuery({
-		queryKey: ["monitor", server_id, period],
-		queryFn: () => fetchMonitor(server_id, period),
+		queryKey: ["monitor", server_id, period, latencyLabels],
+		queryFn: () => fetchMonitor(server_id, period, latencyLabels),
 		enabled: show,
 		placeholderData: keepPreviousData,
 		refetchOnMount: true,

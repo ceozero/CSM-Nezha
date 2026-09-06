@@ -93,6 +93,11 @@ export interface CfsmConfig {
 	default_language?: "auto" | "zh" | "en";
 	frontend_ws_timeout_minutes: number;
 	long_history_points: number;
+	/** 后台 Ping 节点的自定义显示名称；旧版后端未返回时主题使用默认名称。 */
+	custom_ct_name?: string;
+	custom_cu_name?: string;
+	custom_cm_name?: string;
+	custom_bd_name?: string;
 	theme_options: Record<string, unknown>;
 }
 

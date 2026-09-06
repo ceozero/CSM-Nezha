@@ -204,7 +204,7 @@ function ServerCardInline({
 							</div>
 						</div>
 					</section>
-					{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency latency={serverInfo.state.network_latency} />}
+					{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency latency={serverInfo.state.network_latency} labels={siteDisplayConfig.latencyLabels} />}
 					{(parsedData?.planDataMod || architectureBadge) && <PlanInfo parsedData={parsedData} architectureBadge={architectureBadge} showTraffic={siteDisplayConfig.showTraffic} />}
 				</div>
 			</Card>
