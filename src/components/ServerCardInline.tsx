@@ -1,15 +1,12 @@
 import { memo } from "react";
-import { Clock3, Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
+import { Clock3, Cpu, Download, HardDrive, MemoryStick, MonitorCog, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
 import ServerNetworkLatency from "@/components/ServerNetworkLatency";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { formatBytes } from "@/lib/format";
-import {
-	getCfsmOsIcon,
-	GetOsName,
-} from "@/lib/logo-class";
+import { GetOsName } from "@/lib/logo-class";
 import { saveMainPageScrollPosition } from "@/lib/navigation";
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils";
 import { getCpuArchitectureBadge } from "@/lib/cpu-architecture";
@@ -111,15 +108,11 @@ function ServerCardInline({
 					<section className={cn("grid grid-cols-9 items-center gap-3 flex-1")}>
 						<div className={"whitespace-nowrap"}>
 							<div className={"flex w-14 flex-col items-center text-center"}>
-								<p className="flex items-center gap-1 text-xs text-muted-foreground">
-									<img
-										alt=""
-										className="size-[10px] object-contain"
-										src={getCfsmOsIcon(platform)}
-									/>
+								<p className="flex w-full items-center justify-center gap-1 text-xs text-muted-foreground">
+									<MonitorCog aria-hidden="true" className="size-3 text-rose-500" />
 									{t("serverCard.system")}
 								</p>
-								<div className="flex items-center text-[10.5px] font-semibold">
+								<div className="flex w-full items-center justify-center text-[10.5px] font-semibold">
 									{platform.includes("Windows")
 										? "Windows"
 										: GetOsName(platform)}
