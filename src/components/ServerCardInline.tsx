@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
+import { Clock3, Cpu, Download, HardDrive, MemoryStick, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ServerFlag from "@/components/ServerFlag";
@@ -127,13 +127,14 @@ function ServerCardInline({
 							</div>
 						</div>
 						<div className={"flex w-20 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Clock3 aria-hidden="true" className="size-3 text-slate-500" />
 								{t("serverCard.uptime")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">
 								{uptime / 86400 >= 1
-									? `${(uptime / 86400).toFixed(0)} ${t("serverCard.days")}`
-									: `${(uptime / 3600).toFixed(0)} ${t("serverCard.hours")}`}
+									? `${Math.floor(uptime / 86400)} ${t("serverCard.days")}`
+									: `${Math.floor(uptime / 3600)} ${t("serverCard.hours")}`}
 							</div>
 						</div>
 						<div className={"flex w-14 flex-col"}>
@@ -193,7 +194,8 @@ function ServerCardInline({
 							</div>
 						</div>
 						<div className={"flex w-20 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Upload aria-hidden="true" className="size-3 text-cyan-500" />
 								{t("serverCard.totalUpload")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">
@@ -201,7 +203,8 @@ function ServerCardInline({
 							</div>
 						</div>
 						<div className={"flex w-20 flex-col"}>
-							<p className="text-xs text-muted-foreground">
+							<p className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
+								<Download aria-hidden="true" className="size-3 text-violet-500" />
 								{t("serverCard.totalDownload")}
 							</p>
 							<div className="flex items-center text-xs font-semibold">

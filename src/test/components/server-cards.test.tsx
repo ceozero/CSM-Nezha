@@ -257,6 +257,24 @@ describe("ServerCardInline", () => {
 		expect(screen.getByText("1.00 GiB")).toBeInTheDocument();
 	});
 
+	it("uses the same rounded-down day count for inline uptime and online days", () => {
+		const server = createServer({
+			name: "edge-inline-uptime",
+			public_note: publicNote,
+			state: { uptime: 2.9 * 86_400 },
+		});
+
+		renderWithProviders(
+			<ServerCardInline
+				now={Date.parse("2025-01-01T00:00:20.000Z")}
+				serverInfo={server}
+			/>,
+		);
+
+		expect(screen.getByText("2 serverCard.days")).toBeInTheDocument();
+		expect(screen.getByText("billingInfo.onlineDays")).toBeInTheDocument();
+	});
+
 	it("renders offline inline server cards with saved plan data", () => {
 		const server = createServer({
 			id: 10,
