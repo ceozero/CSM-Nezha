@@ -206,7 +206,7 @@ function ServerCard({
 						</div>
 					</div>
 				</section>
-				{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency latency={serverInfo.state.network_latency} labels={siteDisplayConfig.latencyLabels} />}
+				{siteDisplayConfig.showThreeNetDetails && <ServerNetworkLatency compact latency={serverInfo.state.network_latency} labels={siteDisplayConfig.latencyLabels} />}
 				{showNetTransfer && (
 					<section className={"flex items-center w-full justify-between gap-1"}>
 						<ServerTrafficUsage

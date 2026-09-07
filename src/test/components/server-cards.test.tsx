@@ -145,15 +145,16 @@ describe("ServerCard", () => {
 		);
 
 		const latency = screen.getByLabelText("最新线路延迟");
-		expect(latency).toHaveTextContent("电信125ms丢 10%");
-		expect(latency).toHaveTextContent("联通127ms丢 3%");
-		expect(latency).toHaveTextContent("移动84ms丢 1%");
-		expect(latency).toHaveTextContent("BGP51ms丢 0%");
-		expect(latency).toHaveTextContent("Node 162ms丢 2%");
-		expect(screen.getByText("丢 10%")).toHaveClass("font-bold", "text-rose-500");
-		expect(screen.getByText("丢 3%")).toHaveClass("text-orange-500");
-		expect(screen.getByText("丢 1%")).toHaveClass("text-amber-500");
-		expect(screen.getByText("丢 0%")).toHaveClass("text-emerald-600");
+		expect(latency).toHaveTextContent("电信125ms10%");
+		expect(latency).toHaveTextContent("联通127ms3%");
+		expect(latency).toHaveTextContent("移动84ms1%");
+		expect(latency).toHaveTextContent("BGP51ms0%");
+		expect(latency).toHaveTextContent("Node 162ms2%");
+		expect(latency).not.toHaveTextContent("丢");
+		expect(screen.getByText("10%")).toHaveClass("font-bold", "text-rose-500");
+		expect(screen.getByText("3%")).toHaveClass("text-orange-500");
+		expect(screen.getByText("1%")).toHaveClass("text-amber-500");
+		expect(screen.getAllByText("0%")[0]).toHaveClass("text-emerald-600");
 	});
 
 	it("uses customized Ping node names when supplied by the backend", () => {

@@ -35,10 +35,13 @@ export default function ServerNetworkLatency({
 	latency,
 	labels = defaultLatencyLabels,
 	className,
+	compact = false,
 }: {
 	latency?: NezhaNetworkLatency;
 	labels?: LatencyLabels;
 	className?: string;
+	/** 首页卡片空间有限时省略“丢”字，详情等宽松区域保留完整说明。 */
+	compact?: boolean;
 }) {
 	const routes = ROUTES.flatMap((route) => {
 		const probe = latency?.[route.key];
@@ -63,7 +66,7 @@ export default function ServerNetworkLatency({
 					</span>
 					{route.loss !== undefined && (
 						<span className={cn(lossTone(route.loss), "tabular-nums")}>
-							丢 {Math.round(route.loss)}%
+							{compact ? "" : "丢 "}{Math.round(route.loss)}%
 						</span>
 					)}
 				</span>

@@ -45,6 +45,8 @@ export function SortProvider({ children }: { children: ReactNode }) {
 		};
 
 		applyForcedSort();
+		// 主题全局变量已就绪时仅在初始化阶段应用一次，不能在用户手动排序后再次覆盖。
+		if (window.ForceSortType || window.ForceSortOrder) return;
 
 		let retryCount = 0;
 		const intervalId = window.setInterval(() => {
