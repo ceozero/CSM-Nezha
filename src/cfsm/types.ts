@@ -14,6 +14,10 @@ export interface CfsmLatencyPoint {
 	cu?: number | false;
 	cm?: number | false;
 	bd?: number | false;
+	node_1?: number | false;
+	node_2?: number | false;
+	node_3?: number | false;
+	node_4?: number | false;
 }
 
 export interface CfsmServer {
@@ -63,10 +67,18 @@ export interface CfsmServer {
 	ping_cu?: number | false;
 	ping_cm?: number | false;
 	ping_bd?: number | false;
+	ping_node_1?: number | false;
+	ping_node_2?: number | false;
+	ping_node_3?: number | false;
+	ping_node_4?: number | false;
 	loss_ct?: number | false;
 	loss_cu?: number | false;
 	loss_cm?: number | false;
 	loss_bd?: number | false;
+	loss_node_1?: number | false;
+	loss_node_2?: number | false;
+	loss_node_3?: number | false;
+	loss_node_4?: number | false;
 	[key: string]: unknown;
 }
 
@@ -98,6 +110,10 @@ export interface CfsmConfig {
 	custom_cu_name?: string;
 	custom_cm_name?: string;
 	custom_bd_name?: string;
+	node_1_name?: string;
+	node_2_name?: string;
+	node_3_name?: string;
+	node_4_name?: string;
 	theme_options: Record<string, unknown>;
 }
 

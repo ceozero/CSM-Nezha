@@ -76,7 +76,7 @@ export const fetchLoginUser = async (): Promise<LoginUserResponse> => {
 	};
 };
 
-const LATENCY_ROUTE_KEYS = ["ct", "cu", "cm", "bd"] as const;
+const LATENCY_ROUTE_KEYS = ["ct", "cu", "cm", "bd", "node_1", "node_2", "node_3", "node_4"] as const;
 
 function numberAt(point: object | undefined, key: string) {
 	const value = point && (point as Record<string, unknown>)[key];
@@ -148,6 +148,10 @@ export const fetchMonitor = async (
 		cu: row.ping_cu,
 		cm: row.ping_cm,
 		bd: row.ping_bd,
+		node_1: row.ping_node_1,
+		node_2: row.ping_node_2,
+		node_3: row.ping_node_3,
+		node_4: row.ping_node_4,
 	}));
 	const loss = rows.map((row) => ({
 		ts: Number(row.timestamp),
@@ -155,6 +159,10 @@ export const fetchMonitor = async (
 		cu: row.loss_cu,
 		cm: row.loss_cm,
 		bd: row.loss_bd,
+		node_1: row.loss_node_1,
+		node_2: row.loss_node_2,
+		node_3: row.loss_node_3,
+		node_4: row.loss_node_4,
 	}));
 
 	return toMonitorResponse(server.id, server.name, ping, loss, labels);

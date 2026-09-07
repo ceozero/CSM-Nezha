@@ -165,7 +165,7 @@ describe("NetworkChart", () => {
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
 		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "realtime", {
-			ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+			ct: "电信", cu: "联通", cm: "移动", bd: "BGP", node_1: "Node 1", node_2: "Node 2", node_3: "Node 3", node_4: "Node 4",
 		});
 		expect(screen.getByText("2 monitor.monitorCount")).toBeInTheDocument();
 		expect(screen.getByText("Alpha")).toBeInTheDocument();
@@ -179,7 +179,7 @@ describe("NetworkChart", () => {
 
 		await waitFor(() => {
 			expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "7d", {
-				ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+				ct: "电信", cu: "联通", cm: "移动", bd: "BGP", node_1: "Node 1", node_2: "Node 2", node_3: "Node 3", node_4: "Node 4",
 			});
 		});
 	});
@@ -201,7 +201,7 @@ describe("NetworkChart", () => {
 
 		expect(await screen.findByText("edge-chart")).toBeInTheDocument();
 		expect(apiMocks.fetchMonitor).toHaveBeenCalledWith("7", "1d", {
-			ct: "电信", cu: "联通", cm: "移动", bd: "BGP",
+			ct: "电信", cu: "联通", cm: "移动", bd: "BGP", node_1: "Node 1", node_2: "Node 2", node_3: "Node 3", node_4: "Node 4",
 		});
 		expect(screen.queryByText("monitor.period1d")).not.toBeInTheDocument();
 		expect(screen.queryByRole("switch")).not.toBeInTheDocument();

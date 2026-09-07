@@ -43,6 +43,10 @@ function toSiteDisplayConfig(response: ServersResponse, cfsmConfig?: Awaited<Ret
 		cu: labelOrDefault(cfsmConfig?.custom_cu_name, defaultLatencyLabels.cu),
 		cm: labelOrDefault(cfsmConfig?.custom_cm_name, defaultLatencyLabels.cm),
 		bd: labelOrDefault(cfsmConfig?.custom_bd_name, defaultLatencyLabels.bd),
+		node_1: labelOrDefault(cfsmConfig?.node_1_name, defaultLatencyLabels.node_1),
+		node_2: labelOrDefault(cfsmConfig?.node_2_name, defaultLatencyLabels.node_2),
+		node_3: labelOrDefault(cfsmConfig?.node_3_name, defaultLatencyLabels.node_3),
+		node_4: labelOrDefault(cfsmConfig?.node_4_name, defaultLatencyLabels.node_4),
 	};
 	if (!sysConfig) {
 		return {

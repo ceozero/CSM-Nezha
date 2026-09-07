@@ -78,6 +78,11 @@ export interface NezhaNetworkLatency {
 	cm?: NezhaNetworkProbe;
 	/** CFSM 的第四探测线路；主题中按用户习惯显示为 BGP。 */
 	bd?: NezhaNetworkProbe;
+	/** CFSM 2.8.5 Beta4 新增的四个自定义 Ping 节点。 */
+	node_1?: NezhaNetworkProbe;
+	node_2?: NezhaNetworkProbe;
+	node_3?: NezhaNetworkProbe;
+	node_4?: NezhaNetworkProbe;
 }
 
 interface temperature {

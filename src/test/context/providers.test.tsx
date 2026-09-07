@@ -149,7 +149,7 @@ function WebSocketProbe() {
 				{`${siteDisplayConfig.showPrice}:${siteDisplayConfig.showExpire}:${siteDisplayConfig.showTraffic}:${siteDisplayConfig.showThreeNetDetails}`}
 			</p>
 			<p data-testid="latency-labels">
-				{`${siteDisplayConfig.latencyLabels.ct}:${siteDisplayConfig.latencyLabels.cu}:${siteDisplayConfig.latencyLabels.cm}:${siteDisplayConfig.latencyLabels.bd}`}
+				{`${siteDisplayConfig.latencyLabels.ct}:${siteDisplayConfig.latencyLabels.cu}:${siteDisplayConfig.latencyLabels.cm}:${siteDisplayConfig.latencyLabels.bd}:${siteDisplayConfig.latencyLabels.node_1}:${siteDisplayConfig.latencyLabels.node_4}`}
 			</p>
 			<p data-testid="history-server-count">
 				{messageHistory.reduce((total, item) => total + item.servers.length, 0)}
@@ -346,13 +346,15 @@ describe("WebSocketProvider", () => {
 			custom_cu_name: "联通 9929",
 			custom_cm_name: "移动 CMI",
 			custom_bd_name: "国际 BGP",
+			node_1_name: "东京",
+			node_4_name: "新加坡",
 		});
 
 		renderWebSocketProvider(<WebSocketProbe />);
 
 		await vi.waitFor(() =>
 			expect(screen.getByTestId("latency-labels")).toHaveTextContent(
-				"电信 163:联通 9929:移动 CMI:国际 BGP",
+				"电信 163:联通 9929:移动 CMI:国际 BGP:东京:新加坡",
 			),
 		);
 	});

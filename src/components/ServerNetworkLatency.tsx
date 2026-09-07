@@ -10,6 +10,10 @@ const ROUTES = [
 	{ key: "cu" },
 	{ key: "cm" },
 	{ key: "bd" },
+	{ key: "node_1" },
+	{ key: "node_2" },
+	{ key: "node_3" },
+	{ key: "node_4" },
 ] as const;
 
 function latencyTone(delay: number, loss?: number) {

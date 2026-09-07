@@ -135,6 +135,7 @@ describe("ServerCard", () => {
 					cu: { delay: 127, loss: 3 },
 					cm: { delay: 84, loss: 1 },
 					bd: { delay: 51, loss: 0 },
+					node_1: { delay: 62, loss: 2 },
 				},
 			},
 		});
@@ -148,6 +149,7 @@ describe("ServerCard", () => {
 		expect(latency).toHaveTextContent("联通127ms丢 3%");
 		expect(latency).toHaveTextContent("移动84ms丢 1%");
 		expect(latency).toHaveTextContent("BGP51ms丢 0%");
+		expect(latency).toHaveTextContent("Node 162ms丢 2%");
 		expect(screen.getByText("丢 10%")).toHaveClass("font-bold", "text-rose-500");
 		expect(screen.getByText("丢 3%")).toHaveClass("text-orange-500");
 		expect(screen.getByText("丢 1%")).toHaveClass("text-amber-500");
@@ -157,13 +159,14 @@ describe("ServerCard", () => {
 	it("uses customized Ping node names when supplied by the backend", () => {
 		render(
 			<ServerNetworkLatency
-				labels={{ ct: "电信 163", cu: "联通 9929", cm: "移动 CMI", bd: "国际 BGP" }}
-				latency={{ ct: { delay: 125, loss: 0 }, bd: { delay: 51, loss: 0 } }}
+				labels={{ ct: "电信 163", cu: "联通 9929", cm: "移动 CMI", bd: "国际 BGP", node_1: "东京", node_2: "洛杉矶", node_3: "法兰克福", node_4: "新加坡" }}
+				latency={{ ct: { delay: 125, loss: 0 }, bd: { delay: 51, loss: 0 }, node_1: { delay: 72, loss: 0 } }}
 			/>,
 		);
 
 		expect(screen.getByText("电信 163")).toBeInTheDocument();
 		expect(screen.getByText("国际 BGP")).toBeInTheDocument();
+		expect(screen.getByText("东京")).toBeInTheDocument();
 	});
 
 	it("uses the left transfer box for the monthly quota and the right one for total traffic", () => {

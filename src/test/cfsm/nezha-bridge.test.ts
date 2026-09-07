@@ -77,10 +77,14 @@ describe("toNezhaServer", () => {
 			ping_cu: 127,
 			ping_cm: 84,
 			ping_bd: 51,
+			ping_node_1: 62,
+			ping_node_4: 79,
 			loss_ct: 16,
 			loss_cu: 0,
 			loss_cm: 0,
 			loss_bd: 0,
+			loss_node_1: 2,
+			loss_node_4: 0,
 		});
 
 		expect(server.state.network_latency).toEqual({
@@ -88,6 +92,8 @@ describe("toNezhaServer", () => {
 			cu: { delay: 127, loss: 0 },
 			cm: { delay: 84, loss: 0 },
 			bd: { delay: 51, loss: 0 },
+			node_1: { delay: 62, loss: 2 },
+			node_4: { delay: 79, loss: 0 },
 		});
 	});
 });

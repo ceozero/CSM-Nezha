@@ -78,12 +78,12 @@ describe("Nezha 视图兼容 API", () => {
 		await expect(Promise.all([cpuRequest, memoryRequest])).resolves.toHaveLength(2);
 	});
 
-	it("将 CFSM 四线路窗口桥接为原主题的网络图表数据", async () => {
+	it("将 CFSM 八线路窗口桥接为原主题的网络图表数据", async () => {
 		apiMocks.getServers.mockResolvedValue({
 			servers: [{
 				...server,
-				ping: [{ ts: 1000, ct: 21, cu: 25, cm: 30, bd: 35 }],
-				loss: [{ ts: 1000, ct: 0, cu: 1, cm: 0, bd: 2 }],
+				ping: [{ ts: 1000, ct: 21, cu: 25, cm: 30, bd: 35, node_1: 42, node_4: 58 }],
+				loss: [{ ts: 1000, ct: 0, cu: 1, cm: 0, bd: 2, node_1: 0, node_4: 3 }],
 			}],
 		});
 		const monitor = await fetchMonitor("node-1", "realtime");
@@ -92,6 +92,8 @@ describe("Nezha 视图兼容 API", () => {
 			expect.objectContaining({ monitor_name: "电信", server_id: "node-1", avg_delay: [21], packet_loss: [0] }),
 			expect.objectContaining({ monitor_name: "联通", avg_delay: [25], packet_loss: [1] }),
 			expect.objectContaining({ monitor_name: "BGP", avg_delay: [35], packet_loss: [2] }),
+			expect.objectContaining({ monitor_name: "Node 1", avg_delay: [42], packet_loss: [0] }),
+			expect.objectContaining({ monitor_name: "Node 4", avg_delay: [58], packet_loss: [3] }),
 		]));
 	});
 
@@ -105,10 +107,8 @@ describe("Nezha 视图兼容 API", () => {
 		});
 
 		const monitor = await fetchMonitor("node-1", "realtime", {
-			ct: "电信 163",
-			cu: "联通 9929",
-			cm: "移动 CMI",
-			bd: "国际 BGP",
+			ct: "电信 163", cu: "联通 9929", cm: "移动 CMI", bd: "国际 BGP",
+			node_1: "东京", node_2: "洛杉矶", node_3: "法兰克福", node_4: "新加坡",
 		});
 
 		expect(monitor.data).toEqual(expect.arrayContaining([
